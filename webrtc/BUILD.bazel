@@ -1,0 +1,54 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "build_sctp",
+    srcs = ["build_sctp.sh"],
+    data = [
+        "@webrtc_build//:all_srcs",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+# Append build rules for webrtc static libraries
+cc_library(
+    name = "webrtc",
+    srcs = ["libwebrtc.a"],
+    hdrs = glob(
+        ["include/**/*.h"],
+        allow_empty = True,
+        exclude = ["include/third_party/**/*.h"],
+    ),
+    defines = [
+        "WEBRTC_POSIX",
+        "WEBRTC_LINUX",
+        "WEBRTC_ENABLE_SYMBOL_EXPORT",
+    ],
+    includes = ["include"],
+    linkopts = [
+        "-ldl",
+        "-pthread",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "webrtc_dbg",
+    srcs = ["libwebrtc_debug.a"],
+    hdrs = glob(
+        ["include/**/*.h"],
+        allow_empty = True,
+        exclude = ["include/third_party/**/*.h"],
+    ),
+    defines = [
+        "WEBRTC_POSIX",
+        "WEBRTC_LINUX",
+    ],
+    includes = ["include"],
+    linkopts = [
+        "-ldl",
+        "-pthread",
+    ],
+    alwayslink = 1,
+)

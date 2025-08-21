@@ -1,0 +1,66 @@
+diff --git a/tensorflow_serving/util/net_http/public/BUILD b/tensorflow_serving/util/net_http/public/BUILD
+index 7b00a099..07cfcae6 100644
+--- a/tensorflow_serving/util/net_http/public/BUILD
++++ b/tensorflow_serving/util/net_http/public/BUILD
+@@ -1,9 +1,7 @@
+ # Description: shared files
+ 
+ package(default_visibility = [
+-    ":http_server_clients",
+-    "//tensorflow_serving:internal",
+-    "//tensorflow_serving/util/net_http:__subpackages__",
++    "//visibility:public",
+ ])
+ 
+ # TODO(wenboz): Remove this visibility list as net_http is now open-sourced and
+diff --git a/tensorflow_serving/util/net_http/server/public/BUILD b/tensorflow_serving/util/net_http/server/public/BUILD
+index 1953a10d..f0f6efdc 100644
+--- a/tensorflow_serving/util/net_http/server/public/BUILD
++++ b/tensorflow_serving/util/net_http/server/public/BUILD
+@@ -1,9 +1,7 @@
+ # Description: a lightweight http server and related utils to support Web clients
+ 
+ package(default_visibility = [
+-    "//tensorflow_serving:internal",
+-    "//tensorflow_serving/util/net_http:__subpackages__",
+-    "//tensorflow_serving/util/net_http/public:http_server_clients",
++    "//visibility:public",
+ ])
+ 
+ licenses(["notice"])
+diff --git a/third_party/libevent/BUILD b/third_party/libevent/BUILD
+index 4a6dc978..f442c98d 100644
+--- a/third_party/libevent/BUILD
++++ b/third_party/libevent/BUILD
+@@ -49,20 +49,30 @@ lib_files = [
+     "libevent/lib/libevent_pthreads.a",
+ ]
+ 
++# Group the sources of the library so that CMake rule have access to it
++filegroup(
++    name = "all_srcs",
++    srcs = glob(["**"]),
++    visibility = ["//visibility:public"],
++)
++
+ genrule(
+     name = "libevent-srcs",
+     outs = include_files + lib_files,
++    srcs = ["//:all_srcs"],
+     cmd = "\n".join([
+         "export INSTALL_DIR=$$(pwd)/$(@D)/libevent",
+         "export TMP_DIR=$$(mktemp -d -t libevent.XXXXXX)",
+         "mkdir -p $$TMP_DIR",
+-        "cp -R $$(pwd)/external/com_github_libevent_libevent/* $$TMP_DIR",
++        "echo `dirname $(location autogen.sh)`",
++        "cp -R `dirname $(location autogen.sh)`/* $$TMP_DIR",
+         "cd $$TMP_DIR",
+         "./autogen.sh",
+         "./configure --prefix=$$INSTALL_DIR CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-shared=no --disable-openssl",
+         "make install",
+         "rm -rf $$TMP_DIR",
+     ]),
++    tools = ["autogen.sh"],
+ )
+ 
+ cc_library(

@@ -1,0 +1,8 @@
+# Ignore generated bazel files.
+bazel-*
+MODULE.bazel.lock
+
+# Ignore build files
+out/
+webrtc/libwebrtc*
+webrtc/include/

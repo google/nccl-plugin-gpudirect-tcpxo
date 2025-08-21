@@ -1,0 +1,109 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE.md file or at
+ * https://developers.google.com/open-source/licenses/bsd
+ */
+
+edition = "2023";
+
+package tcpdirect;
+
+import "google/rpc/status.proto";
+
+option features.enum_type = CLOSED;
+option features.utf8_validation = NONE;
+
+enum BufferOpType {
+  OP_UNSPECIFIED = 0;
+  REG_BUFFER = 1;
+  DEREG_BUFFER = 2;
+}
+
+enum ExportHandleType {
+  MEM_UNSPECIFIED = 0;  // Invalid memory type
+
+  MEM_GPU_HANDLE = 1;  // CUDA IPC handles
+
+  MEM_GPU_FD = 2;  // CUDA open source shareable handles in fds
+
+  MEM_UDMABUF = 3;  // UDMABUF fd
+}
+
+message FdMetadata {
+  uint64 size = 1;
+  uint64 align = 2;
+}
+
+message ExportHandle {
+  oneof handle_oneof {
+    bytes mem_handle = 1;
+    FdMetadata mem_fd = 2;
+  }
+}
+
+message UnixSocketMessage {
+  bytes text = 1;
+  int32 fd = 2;
+}
+
+message GetNicIpReq {
+  string gpu_pci = 1;
+}
+
+message GetNicIpResp {
+  // Introduce status to populate errors so deprecate result field.
+  reserved 1;
+
+  reserved result;
+
+  string nic_ip = 2;
+  google.rpc.Status status = 3;
+}
+
+message GetNicMappingReq {}
+
+message GetNicMappingResp {
+  // Return the NicMapping for each GPU PCI address on the host.
+  map<string, NicMapping> pci_nic_map = 1;
+}
+
+message NicMapping {
+  // The IPs of the closest NICs to the given GPU.
+  repeated string closest_nic_ip = 1;
+}
+
+message GetBounceBufReq {
+  string nic_ip = 1;
+  uint32 fts_magic_value = 2;
+}
+
+message GetBounceBufResp {
+  // Introduce status to populate errors so deprecate result field.
+  reserved 1;
+
+  reserved result;
+
+  ExportHandle handle = 2;
+  ExportHandleType handle_type = 3;
+  uint64 reg_handle = 4;
+  google.rpc.Status status = 5;
+}
+
+message BufferOpReq {
+  uint32 fts_magic_value = 1;
+  BufferOpType op_type = 2;
+  uint64 size = 3;
+  uint64 reg_handle = 4;
+}
+
+message BufferOpResp {
+  // Introduce status to populate errors so deprecate result field.
+  reserved 1;
+
+  reserved result;
+
+  uint64 reg_handle = 2;
+  google.rpc.Status status = 3;
+}
