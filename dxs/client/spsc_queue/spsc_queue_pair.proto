@@ -1,0 +1,18 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE.md file or at
+ * https://developers.google.com/open-source/licenses/bsd
+ */
+
+edition = "2023";
+
+package dxs;
+
+option java_multiple_files = true;
+
+message SpscQueuePairState {
+  uint64 local_bytes_consumed = 1;
+  uint64 remote_bytes_produced = 2;
+}

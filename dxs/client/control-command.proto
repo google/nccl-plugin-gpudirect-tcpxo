@@ -1,0 +1,50 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE.md file or at
+ * https://developers.google.com/open-source/licenses/bsd
+ */
+
+edition = "2023";
+
+package dxs;
+
+option features.field_presence = IMPLICIT;
+
+message ProtoInit {
+  message SubscribeToPeriodicStats {
+    int64 period_ms = 1;
+  }
+}
+
+message ProtoInitAck {}
+
+message PeriodicStatsUpdate {
+  uint64 goodput_rx_bytes = 1;
+  uint64 goodput_tx_bytes = 2;
+}
+
+// Spec for GCS files. access_token must be an oauth token.
+message GcsSpec {
+  string bucket = 1;
+  string object = 2;
+}
+
+// Representation of a block of registered memory.
+message RegPayload {
+  // Registration handle for the memory.
+  uint64 reg = 1;
+
+  // Offset into the registration for this payload.
+  uint64 offset = 2;
+
+  // Size of this payload.
+  uint64 size = 3;
+}
+
+// scatter-gather buffers for sending and recving for this collective.
+message CollectiveData {
+  repeated RegPayload send = 1;
+  repeated RegPayload recv = 2;
+}

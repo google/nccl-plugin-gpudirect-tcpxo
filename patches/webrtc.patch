@@ -1,0 +1,47 @@
+diff --git a/util.sh b/util.sh
+index d889fb4..98315c7 100644
+--- a/util.sh
++++ b/util.sh
+@@ -233,12 +233,14 @@ function compile-unix() {
+   local outputdir="$1"
+   local gn_args="$2"
+   local blacklist="unittest|examples|/yasm|protobuf_lite|main.o|\
+-video_capture_external.o|device_info_external.o"
++video_capture_external.o|device_info_external.o|abseil"
+
++  sed -i '/complete_static_lib.*/d' BUILD.gn
++  sed -i 's/use_debug_fission = *$/use_debug_fission = \!is_linux \&\&/g' build/config/compiler/compiler.gni
+   gn gen $outputdir --args="$gn_args"
+   pushd $outputdir >/dev/null
+-  ninja -C .
+
++  ninja -C . :dcsctp
+   rm -f libwebrtc_full.a
+   # Produce an ordered objects list by parsing .ninja_deps for strings
+   # matching .o files.
+@@ -254,6 +256,8 @@ video_capture_external.o|device_info_external.o"
+   cat libwebrtc_full.list | xargs ar -crs libwebrtc_full.a
+   # generate an index list
+   ranlib libwebrtc_full.a
++
++
+   popd >/dev/null
+ }
+
+@@ -278,6 +282,7 @@ function compile() {
+   pushd $outdir/src >/dev/null
+   for cfg in $configs; do
+     [ "$cfg" = 'Release' ] && common_args+=' is_debug=false'
++    [ "$cfg" = 'Debug' ] && common_args+=' is_debug=true'
+     case $platform in
+     win)
+       # 32-bit build
+@@ -291,7 +296,7 @@ function compile() {
+       # On Linux when not cross-compiling, use clang = false and sysroot = false
+       # to build using gcc. Comment this out to use clang.
+       if [[ $platform = 'linux' && $target_os != 'android' && $target_cpu != amd* ]]; then
+-        target_args+=" is_clang=false use_sysroot=false"
++        target_args+=" is_clang=false use_sysroot=false use_custom_libcxx=false"
+       fi
+
+       # Debug builds are component builds (shared libraries) by default unless

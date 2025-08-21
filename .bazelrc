@@ -1,0 +1,6 @@
+# Enable Bzlmod for every Bazel command
+common --enable_bzlmod
+
+# Our target build environment is Ubuntu 22.04, which supports C++20.
+build --action_env=BAZEL_CXXOPTS="-std=c++20:-Wall"
+build --show_timestamps --keep_going --jobs=HOST_CPUS
