@@ -235,6 +235,8 @@ ncclResult_t Test(void* request, int* done, int* size) {
   auto req_status = req->comm->shim->Test(*req);
   if (!req_status.ok()) {
     req->error = true;
+    if (size) *size = 0;
+    *done = true;
   }
   ASSIGN_OR_RETURN(std::optional<int> result, req_status,
                    _.LogWarning().With(&ToNccl));

@@ -1,5 +1,5 @@
 # https://github.com/moby/moby/issues/34482
-ARG PRECOMPILED_LIBS=us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirect-tcpxo-precompiled-libs:v1.0.0
+ARG PRECOMPILED_LIBS=us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirect-tcpxo-precompiled-libs:v1.0.1
 FROM ${PRECOMPILED_LIBS} AS precompiled_libs
 
 FROM nvidia/cuda:12.8.0-devel-ubuntu22.04

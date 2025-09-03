@@ -4,5 +4,6 @@ MODULE.bazel.lock
 
 # Ignore build files
 out/
+nccl-netsupport/
 webrtc/libwebrtc*
 webrtc/include/

@@ -10,6 +10,7 @@
 #define TCPDIRECT_PLUGIN_FASTRAK_OFFLOAD_MACRO_H_
 
 #include "absl/log/log.h"
+#include "nccl.h"
 #include "nccl_common.h"
 
 namespace fastrak {

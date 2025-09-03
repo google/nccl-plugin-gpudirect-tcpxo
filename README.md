@@ -103,7 +103,7 @@ performance and stability with the following NCCL and CUDA version:
 
 CUDA | NCCL
 ---- | ---------
-12.8 | v2.26.5-1
+12.8 | v2.28.3-1
 
 In addition to the above, we've verified that the following combinations are
 buildable:
@@ -116,6 +116,8 @@ CUDA | NCCL
 12.8 | v2.19.3-1
 12.8 | v2.21.5-1
 12.8 | v2.23.4-1
+12.8 | v2.26.5-1
+12.8 | v2.27.5-1
 
 ## Prerequisites
 
@@ -258,8 +260,8 @@ available at `/usr/local`. Here's the required directory structure:
   \..
     /cuda-12.8
     /cuda -> cuda-12.8
-    /nccl-v2.26.5-1
-    /nccl -> nccl-v2.26.5-1
+    /nccl-v2.28.3-1
+    /nccl -> nccl-v2.28.3-1
 ```
 
 A typical CUDA Toolkit installation using NVIDIA's `.deb` packages will create a
@@ -267,25 +269,25 @@ A typical CUDA Toolkit installation using NVIDIA's `.deb` packages will create a
 `/usr/local/cuda` through the
 [Debian alternatives system](https://wiki.debian.org/DebianAlternatives). For
 NCCL, we can leverage the same. The following instructions are for NCCL
-`v2.26.5-1`, please adapt to the NCCL version you are using.
+`v2.28.3-1`, please adapt to the NCCL version you are using.
 
 1.  Clone the repository to `/usr/local`:
 
     ```sh
-    sudo git clone https://github.com/NVIDIA/nccl.git /usr/local/nccl-v2.26.5-1
+    sudo git clone https://github.com/NVIDIA/nccl.git /usr/local/nccl-v2.28.3-1
     ```
 
 2.  Checkout the desired version:
 
     ```sh
-    cd /usr/local/nccl-v2.26.5-1
-    sudo git checkout v2.26.5-1
+    cd /usr/local/nccl-v2.28.3-1
+    sudo git checkout v2.28.3-1
     ```
 
 3.  Add it to the alternatives system:
 
     ```sh
-    sudo update-alternatives --install /usr/local/nccl nccl /usr/local/nccl-v2.26.5-1 22651
+    sudo update-alternatives --install /usr/local/nccl nccl /usr/local/nccl-v2.28.3-1 22831
     ```
 
 4.  Done! You can now use:
@@ -297,7 +299,7 @@ NCCL, we can leverage the same. The following instructions are for NCCL
     To interactively configure the active NCCL version, or:
 
     ```sh
-    sudo update-alternatives --set nccl /usr/local/nccl-v2.26.5-1
+    sudo update-alternatives --set nccl /usr/local/nccl-v2.28.3-1
     ```
 
     To set it non-interactively.
@@ -347,7 +349,7 @@ Here are some tips for setting up the prerequisites on non-Ubuntu distributions:
         simply create a symlink:
 
         ```sh
-        sudo ln -s /usr/local/nccl-v2.26.5-1 /usr/local/nccl
+        sudo ln -s /usr/local/nccl-v2.28.3-1 /usr/local/nccl
         ```
 
 -   One of our [workspace dependencies](MODULE.bazel) is
