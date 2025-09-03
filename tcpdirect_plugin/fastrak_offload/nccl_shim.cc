@@ -449,13 +449,13 @@ absl::StatusOr<std::optional<NcclShim::Comms>> NcclShim::Accept(
       for (auto i = 0; i < kFastrakNumFlows; ++i) {
         auto& sock = rComm->dxs_socks[i];
         if (sock == nullptr) {
-          ASSIGN_OR_RETURN(
-              sock, listenComm.dxs_listen[i]->Accept(),
-              _ << absl::StrFormat("\nDXS flow ID %d failed to accept comm:%p "
-                                   "comm_trace_id:0x%lx "
-                                   "listen_addr:%s listen_port:%d",
-                                   i, rComm, rComm->trace_id, rComm->dxs_addr,
-                                   rComm->dxs_ports[i]));
+          const auto connect_message = absl::StrFormat(
+              "\nDXS flow ID %d failed to accept comm:%p "
+              "comm_trace_id:0x%lx "
+              "listen_addr:%s listen_port:%d",
+              i, rComm, rComm->trace_id, rComm->dxs_addr, rComm->dxs_ports[i]);
+          ASSIGN_OR_RETURN(sock, listenComm.dxs_listen[i]->Accept(),
+                           _ << connect_message);
         }
         if (sock == nullptr || !sock->SocketReady()) {
           RETURN_IF_ERROR(
@@ -694,12 +694,13 @@ absl::StatusOr<bool> pollFromDxs(ncclSocketRequest& r) {
 
 absl::StatusOr<std::optional<int>> NcclShim::Test(ncclSocketRequest& request) {
   Communication* comm = request.comm;
-  ASSIGN_OR_RETURN(bool done, pollFromDxs(request),
-                   _ << absl::StrFormat(
-                       "\nPolling DXS op returned an error for %s request:%p "
-                       "size:%d.\n%s",
-                       comm->send ? "Send" : "Recv", &request, request.size,
-                       GetNcclCommInfo(*comm)));
+  ASSIGN_OR_RETURN(
+      bool done, pollFromDxs(request),
+      _ << absl::StrFormat(
+          "\nPolling DXS op returned an error for %s request:%p (0x%x) "
+          "size:%d.\n%s",
+          comm->send ? "Send" : "Recv", &request, request.comm->trace_id,
+          request.size, GetNcclCommInfo(*comm)));
   uint32_t flow_idx = request.flow_idx;
   if (!done) {
     if (comm->profilers[flow_idx] != nullptr) {

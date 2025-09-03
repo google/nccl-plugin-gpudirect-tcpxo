@@ -10,6 +10,7 @@
 #define TCPDIRECT_PLUGIN_FASTRAK_OFFLOAD_INIT_H_
 
 #include "absl/status/status.h"
+#include "nccl.h"
 #include "nccl_common.h"
 
 namespace fastrak {

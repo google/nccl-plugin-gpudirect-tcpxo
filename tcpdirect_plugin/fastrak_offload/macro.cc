@@ -10,6 +10,7 @@
 
 #include <cstdint>
 
+#include "nccl.h"
 #include "nccl_common.h"
 
 namespace fastrak {
