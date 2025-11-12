@@ -10,8 +10,6 @@
 
 #include <string>
 
-#include "absl/log/log.h"
-
 namespace dxs {
 
 std::string ToString(DataSockStatus e) {

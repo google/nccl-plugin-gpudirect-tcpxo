@@ -85,8 +85,9 @@ install_nccl() {
 
 install_nccl_plugin() {
   echo -n "Installing NCCL plugin."
-  cp /plugins/lib* /var/lib/tcpxo/lib64/
-  cp /plugins/lib* /var/lib/fastrak/lib64/
+  for loc in tcpxo fastrak; do
+    cp /plugins/libnccl-net.so /plugins/libGPUViz.so /var/lib/${loc}/lib64/
+  done
 }
 
 install_nccl_shim() {

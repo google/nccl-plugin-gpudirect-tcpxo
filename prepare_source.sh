@@ -13,5 +13,5 @@ pushd "$SCRIPT_DIR"
 # Assume failures are due to the repo already being cloned, and continue.
 git clone https://github.com/NVIDIA/nccl.git nccl-netsupport || true
 git -C nccl-netsupport fetch --all --tags
-git -C nccl-netsupport checkout v2.28.3-1
+git -C nccl-netsupport checkout v2.28.7-1
 popd

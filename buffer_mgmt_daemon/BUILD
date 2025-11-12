@@ -188,6 +188,7 @@ cc_library(
         "//dxs/client:control_command_cc_proto",
         "//dxs/client:dxs-client",
         "//dxs/client:dxs-client-types",
+        "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/base:log_severity",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/flags:flag",

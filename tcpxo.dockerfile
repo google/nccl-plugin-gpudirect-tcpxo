@@ -90,6 +90,7 @@ COPY --from=precompiled_libs /plugins/* /plugins/
 
 # setup scripts directory
 COPY tcpxo_scripts /scripts
+RUN mv /plugins/simpleParserMsBwProtobuf.py /scripts/simpleParserMsBwProtobuf.py
 
 WORKDIR /plugins
 ENTRYPOINT ["/scripts/container_entry.sh"]

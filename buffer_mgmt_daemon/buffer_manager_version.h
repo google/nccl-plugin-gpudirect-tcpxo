@@ -14,7 +14,7 @@ inline constexpr int kRxdmMajor = 1;
 
 inline constexpr int kRxdmMinor = 0;
 
-inline constexpr int kRxdmPatch = 19;
+inline constexpr int kRxdmPatch = 20;
 }  // namespace tcpdirect
 
 #endif  // BUFFER_MGMT_DAEMON_BUFFER_MANAGER_VERSION_H_

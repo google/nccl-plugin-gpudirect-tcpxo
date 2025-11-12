@@ -25,7 +25,7 @@
 #include "buffer_mgmt_daemon/client/buffer_mgr_client-interface.h"
 #include "dxs/client/dxs-client-interface.h"
 #include "nccl_cuda/cuda_defs.h"
-#include "net_device.h"
+#include "nccl_device/net_device.h"
 #include "tcpdirect_plugin/fastrak_offload/common.h"
 #include "tcpdirect_plugin/fastrak_offload/profiler_factory.h"
 #include "tcpdirect_plugin/fastrak_offload/request.h"

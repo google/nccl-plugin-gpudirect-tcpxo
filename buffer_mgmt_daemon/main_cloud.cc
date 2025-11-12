@@ -26,7 +26,7 @@
 #include "ecclesia/lib/http/server.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 
-ABSL_FLAG(int, num_nics, 8, "Number of GPU NICs attached to the VM.");
+ABSL_RETIRED_FLAG(int, num_nics, 0, "RETIRED: All fabric NICs will be used.");
 ABSL_FLAG(
     std::string, nics_to_use, "",
     "Comma-separated list of GPU NICs to use, identified by their "
@@ -55,11 +55,10 @@ int main(int argc, char* argv[]) {
   bool use_gpu_mem = absl::GetFlag(FLAGS_use_gpu_mem);
   int num_gpus_to_use = absl::GetFlag(FLAGS_num_gpus_to_use);
 
-  int num_nics = absl::GetFlag(FLAGS_num_nics);
   LOG(INFO) << "Starting up buffer manager, version: " << tcpdirect::kRxdmMajor
             << "." << tcpdirect::kRxdmMinor << "." << tcpdirect::kRxdmPatch;
   absl::flat_hash_set<std::string> nics_set =
-      tcpdirect::GetNICsToUse(&num_nics, absl::GetFlag(FLAGS_nics_to_use));
+      tcpdirect::GetNICsToUse(absl::GetFlag(FLAGS_nics_to_use));
 
   std::string dmabuf_import_path = absl::GetFlag(FLAGS_dmabuf_import_path);
 
@@ -88,7 +87,7 @@ int main(int argc, char* argv[]) {
   }
 
   auto server = std::make_unique<tcpdirect::FasTrakGpuMemManager>(
-      num_nics, use_gpu_mem, dmabuf_import_path,
+      use_gpu_mem, dmabuf_import_path,
       nics_set.empty() ? std::nullopt : std::make_optional(nics_set),
       std::make_unique<tcpdirect::FastrakGpumemManagerCloud>(
           std::move(http_server)),
