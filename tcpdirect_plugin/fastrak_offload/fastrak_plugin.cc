@@ -27,7 +27,7 @@
 #include "nccl_common.h"
 #include "nccl_cuda/cuda_common.h"
 #include "nccl_cuda/cuda_defs.h"
-#include "net_device.h"
+#include "nccl_device/net_device.h"
 #include "tcpdirect_plugin/fastrak_offload/common.h"
 #include "tcpdirect_plugin/fastrak_offload/init.h"
 #include "tcpdirect_plugin/fastrak_offload/nccl_shim.h"

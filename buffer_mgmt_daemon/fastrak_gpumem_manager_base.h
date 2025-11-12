@@ -34,12 +34,11 @@ class FasTrakGpuMemManager : public FasTrakGpuMemManagerInterface {
   // If num_gpus_override is set, it will be used instead of the actual number
   // of GPUs on the machine.
   explicit FasTrakGpuMemManager(
-      int num_nics, bool use_gpu_mem, std::string dmabuf_import_path,
+      bool use_gpu_mem, std::string dmabuf_import_path,
       std::optional<absl::flat_hash_set<std::string>> nics_to_use,
       std::unique_ptr<FastrakGpumemManagerHostInterface> host,
       std::optional<int> num_gpus_override = std::nullopt)
       : host_(std::move(host)),
-        num_nics_(num_nics),
         use_gpu_mem_(use_gpu_mem),
         dmabuf_import_path_(dmabuf_import_path),
         nics_to_use_(nics_to_use),
@@ -56,7 +55,6 @@ class FasTrakGpuMemManager : public FasTrakGpuMemManagerInterface {
   std::unique_ptr<BufferManagerServiceInterface> gpu_mem_importer_;
   std::unique_ptr<GpuIpServer> gpu_ip_server_;
   std::unique_ptr<FastrakGpumemManagerHostInterface> host_;
-  size_t num_nics_;
   bool use_gpu_mem_;
   std::string dmabuf_import_path_;
   std::optional<absl::flat_hash_set<std::string>> nics_to_use_;
@@ -72,9 +70,8 @@ class FasTrakGpuMemManager : public FasTrakGpuMemManagerInterface {
 // Stop the GPU Mem Manager.
 void StopGpuMemManager();
 
-// Decide the number of NICs to use.
-absl::flat_hash_set<std::string> GetNICsToUse(int* num_nics,
-                                              std::string nics_to_use);
+// Obtain the set of NICs to use if optional flag is set.
+absl::flat_hash_set<std::string> GetNICsToUse(std::string nics_to_use);
 
 }  // namespace tcpdirect
 

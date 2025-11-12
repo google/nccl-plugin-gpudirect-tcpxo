@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstdlib>
 #include <fstream>
@@ -22,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/base/log_severity.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/flags/flag.h"
@@ -69,7 +71,7 @@ ABSL_RETIRED_FLAG(std::string, uid, "",
 
 namespace {
 constexpr absl::string_view kHealthCheckFileEnvVar = "HEALTH_CHECK_LOG_FILE";
-
+constexpr std::array<int, 2> kAllowedNumFabricNICs = {4, 8};
 std::atomic<bool> gShouldStop = false;
 
 void sig_handler(int signum) {
@@ -305,14 +307,14 @@ int FasTrakGpuMemManager::Run() {
     info.dxs_client = *std::move(dxs_client);
     nic_infos_.emplace_back(std::move(info));
   }
-  if (nic_infos_.size() != num_nics_) {
+  if (absl::c_find(kAllowedNumFabricNICs, nic_infos_.size()) ==
+      kAllowedNumFabricNICs.end()) {
     SetAndLogError(absl::StrFormat(
-        "Number of NICs detected (%d) is not equal to the actual number of "
-        "NICs specified (%d).",
-        nic_infos_.size(), num_nics_));
+        "Incorrect number of fabric NICs detected: %d.", nic_infos_.size()));
     return 1;
+  } else {
+    LOG(INFO) << "Number of fabric NICs detected: " << nic_infos_.size();
   }
-
   LOG(INFO) << "Environment-related initialization completed.";
 
   // Initialize all interfaces needed
@@ -374,14 +376,12 @@ int FasTrakGpuMemManager::Run() {
   return 0;
 }
 
-absl::flat_hash_set<std::string> GetNICsToUse(int* num_nics,
-                                              std::string nics_to_use) {
+absl::flat_hash_set<std::string> GetNICsToUse(std::string nics_to_use) {
   absl::flat_hash_set<std::string> nics_set;
   if (!nics_to_use.empty()) {
     LOG(INFO) << "Using NICs " << nics_to_use;
     auto nics = absl::StrSplit(nics_to_use, ',');
     nics_set.insert(nics.begin(), nics.end());
-    *num_nics = nics_set.size();
   }
   return nics_set;
 }
