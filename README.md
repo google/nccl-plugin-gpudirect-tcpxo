@@ -47,21 +47,23 @@ To enable `docker` to retrieve these images, see our [gcloud](#gcloud) section.
 
 -   These open-source containers are drop-in replacements for the previous
     closed-source releases.
--   The flags for RxDM have changed between the closed-source release and this
-    open-source release. Starting with
-    `us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev:v1.0.18`,
+-   The flags for RxDM have changed between the previous release and this
+    release. Starting with
+    `us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev:v1.0.20`,
     this is the new flag set for RxDM:
 
     ```
-    --num_hops=2 --num_nics=8
+    --num_hops=2
     ```
 
-    The flags that have been removed are `--uid=` and `--alsologtostderr`. If
-    these these flags are provided, RxDM will print an error like so:
+    The flags that have been removed are `--uid=`, `--alsologtostderr`, and
+    `--num_nics=`. If these these flags are provided, RxDM will print an error
+    like so:
 
     ```
     ERROR: Accessing retired flag 'uid'
     ERROR: Accessing retired flag 'alsologtostderr'
+    ERROR: Accessing retired flag 'num_nics'
     ```
 
     This is not a fatal error nor does it affect the workload in anyway.
