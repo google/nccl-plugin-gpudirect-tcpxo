@@ -58,3 +58,14 @@ cc_library(
         "@googleapis//google/rpc:status_cc_proto",
     ],
 )
+
+cc_library(
+    name = "bounce_buffer_handle",
+    hdrs = [
+        "bounce_buffer_handle.h",
+    ],
+    deps = [
+        "//buffer_mgmt_daemon/proto:tcpfastrak_buffer_mgmt_message_cc_proto",
+        "//dxs/client:dxs-client-types",
+    ],
+)

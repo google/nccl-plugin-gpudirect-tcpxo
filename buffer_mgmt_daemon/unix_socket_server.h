@@ -51,8 +51,6 @@ class UnixSocketServer {
   void HandleClient(int client_socket, uint32_t events);
   void RemoveClient(int client_socket);
 
-  void Worker();
-
   std::string path_;
   ServiceFunc service_handler_{nullptr};
   CleanupFunc cleanup_handler_{nullptr};

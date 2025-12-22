@@ -23,7 +23,6 @@ cuda_library(
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/strings:str_format",
         "@cuda_headers",
-        "@local_cuda//:cuda_runtime",
     ],
 )
 

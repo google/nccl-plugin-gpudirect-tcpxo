@@ -1,0 +1,50 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE.md file or at
+ * https://developers.google.com/open-source/licenses/bsd
+ */
+
+syntax = "proto3";
+
+package dxs.prober;
+
+// ConnectionManager creates and tears down DXS probing connections between a
+// local and remote GPU NIC. It is only used internally by Agent.
+service ConnectionManager {
+  // Set up a new probing connection between a NIC on the client and a NIC on
+  // the server. This connection waits for pings from a remote DXS server and
+  // responds.
+  rpc SetUpPongConnection(SetUpRequest) returns (SetUpReply) {}
+
+  // Notify the remote agent to close a DXS connection.
+  rpc TearDownConnection(TearDownRequest) returns (TearDownReply) {}
+}
+
+message SetUpRequest {
+  // The client's NIC IP and dxs_port that a local DXS server should connect to.
+  string client_gpu_ip = 1;
+  int32 client_dxs_port = 2;
+
+  // server_gpu_ip is the server's GPU NIC that the client wants to connect to.
+  string server_gpu_ip = 3;
+}
+
+message SetUpReply {
+  // The port a local DXS server is listening on.
+  int32 dxs_port = 1;
+}
+
+message TearDownRequest {
+  // ping_ip is the GPU NIC that is the pinging portion of the connection.
+  string ping_ip = 1;
+  // pong_ip is the GPU NIC that is the ponging portion of the connection.
+  string pong_ip = 2;
+
+  // If ping_ip is one of the server Agent's local GPU NICs or if pong_ip is one
+  // of the server Agent's local GPU NICs.
+  bool ping_ip_is_servers_nic = 3;
+}
+
+message TearDownReply {}
