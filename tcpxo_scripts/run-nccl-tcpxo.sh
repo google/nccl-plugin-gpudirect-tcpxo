@@ -27,6 +27,7 @@ run_nccl() {
   local -r num_flows=${10:-8}
   local -r flows_per_group=${11:-2}
   local -r warmup_iter=${12:-5}
+  local -r ctrl_dev=${13:-eth0}
   local -r num_channel=$((gpu_per_node*channels_per_gpu))
 
   local nccl_algo=${NCCL_ALGO:-Ring}
@@ -34,15 +35,15 @@ run_nccl() {
   for i in $(seq 1 1); do
 
   LD_LIBRARY_PATH=${ld_library_path_override} \
-  mpirun --mca btl tcp,self --mca btl_tcp_if_include eth0 --allow-run-as-root \
+  mpirun --mca btl tcp,self --mca btl_tcp_if_include ${ctrl_dev} --allow-run-as-root \
     -np $(( gpu_per_node * "${nhosts}" )) \
     --hostfile "${SCRIPT_DIR}/hostfiles${nhosts}/hostfile${gpu_per_node}" \
-    -x NCCL_FASTRAK_CTRL_DEV=eth0 \
+    -x NCCL_FASTRAK_CTRL_DEV=${ctrl_dev} \
     -x NCCL_FASTRAK_IFNAME=${socket_ifnames} \
     -x NCCL_DEBUG_FILE="${OUTPUT_DIR}/%h/${benchmark}"-%p.log \
     -x NCCL_TOPO_DUMP_FILE="${OUTPUT_DIR}/${VM_NAME}/${benchmark}"_topo.txt \
     -x NCCL_GRAPH_DUMP_FILE="${OUTPUT_DIR}/${VM_NAME}/${benchmark}"_graph.txt \
-    -x NCCL_SOCKET_IFNAME=eth0 \
+    -x NCCL_SOCKET_IFNAME=${ctrl_dev} \
     -x LD_LIBRARY_PATH -x PATH \
     -x NCCL_CROSS_NIC=0 \
     -x NCCL_ALGO=${nccl_algo} \

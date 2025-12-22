@@ -120,7 +120,6 @@ cc_library(
     name = "data-sock",
     srcs = ["data-sock.cc"],
     hdrs = ["data-sock.h"],
-    deps = ["@com_google_absl//absl/log"],
 )
 
 cc_library(

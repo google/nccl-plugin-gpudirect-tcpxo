@@ -1,0 +1,77 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE.md file or at
+ * https://developers.google.com/open-source/licenses/bsd
+ */
+
+syntax = "proto3";
+
+package dxs.prober;
+
+// Agent is an API that allows an external Controller to coordinate probing
+// jobs.
+service AgentService {
+  // Set up new probing connections for the provided Targets. Tears down all
+  // connections the Agent set up from the previous StartPings call. The probe
+  // results will be periodically written to a local file on the RPC server.
+  rpc StartPings(StartPingsRequest) returns (StartPingsReply) {}
+
+  // Tear down all connections the Agent set up from the previous PingList.
+  // Equivalent to calling StartPings with an empty list of targets.
+  rpc StopPings(StopPingsRequest) returns (StopPingsReply) {}
+}
+
+message StartPingsRequest {
+  // probe_rate_qps specifies the rate that probes that will be sent to each
+  // outgoing target. Recommended to be under 10 and uses 1 by default. The
+  // actual probe rate may be lower than this value if there are many probe
+  // targets.
+  //
+  // Example: if there are 50 targets in this StartPingsRequest the
+  // Agent will send 50 * probe_rate_qps probes.
+  int32 probe_rate_qps = 1;
+
+  // If true the ping side will verify the payload that it receives has the
+  // expected content. This requires allocating a ~2mb receive buffer on the
+  // ping side per target. If false the Agent will share a single receive buffer
+  // buffer for all probing connections to a GPU.
+  bool verify_payload = 2;
+
+  // Targets is a list of GPU NICs pairs that should probe each other. The
+  // connection will fail to set up if the pairs are not rail aligned.
+  // Recommended to be less than 50 per local NIC (400 total).
+  repeated Target targets = 3;
+}
+
+message Target {
+  // local_nic_ip_address is the IP address of one of the GPU NICs on the Agent
+  // RPC server this request is going to.
+  string local_nic_ip_address = 3;
+
+  // peer_nic_ip_address is the IP address of a remote GPU NIC.
+  string peer_nic_ip_address = 4;
+}
+
+// ConnectionResults is a list of the results of setting up a probe connection
+// with each target pair in the StartPingsRequest. The StartPings status
+// response will contain a ConnectionResults message in the
+// google.rpc.Status.Details field. The results will be the same size and in
+// the same order as the targets received in the StartPingsRequest.
+message ConnectionResults {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_SUCCESS = 1;
+    RESULT_FAILURE = 2;
+    RESULT_FAILURE_ALLOCATING_GPU_MEMORY = 3;
+    RESULT_FAILURE_CONNECTION_LIMIT = 4;
+  }
+  repeated Result results = 1;
+}
+
+message StartPingsReply {}
+
+message StopPingsRequest {}
+
+message StopPingsReply {}
