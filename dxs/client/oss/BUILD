@@ -1,7 +1,7 @@
 # OSS-only replacements for internal libraries. Only included in OSS builds. Do not expose
 # visibility for internal builds.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -26,17 +26,6 @@ cc_library(
 cc_library(
     name = "barrier",
     hdrs = ["barrier.h"],
-)
-
-cc_binary(
-    name = "status_macros_build_test",
-    testonly = 1,
-    srcs = ["status_macros_build_test.cc"],
-    deps = [
-        ":status_macros",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-    ],
 )
 
 cc_library(

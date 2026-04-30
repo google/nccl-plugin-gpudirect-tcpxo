@@ -2,6 +2,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+config_setting(
+    name = "using_system_webrtc",
+    values = {"define": "webrtc=system"},
+)
+
 sh_binary(
     name = "build_sctp",
     srcs = ["build_sctp.sh"],
@@ -12,8 +17,24 @@ sh_binary(
 )
 
 # Append build rules for webrtc static libraries
-cc_library(
+alias(
     name = "webrtc",
+    actual = select({
+        ":using_system_webrtc": "@webrtc//:webrtc",
+        "//conditions:default": ":webrtc_local",
+    }),
+)
+
+alias(
+    name = "webrtc_dbg",
+    actual = select({
+        ":using_system_webrtc": "@webrtc//:webrtc_dbg",
+        "//conditions:default": ":webrtc_dbg_local",
+    }),
+)
+
+cc_library(
+    name = "webrtc_local",
     srcs = ["libwebrtc.a"],
     hdrs = glob(
         ["include/**/*.h"],
@@ -34,7 +55,7 @@ cc_library(
 )
 
 cc_library(
-    name = "webrtc_dbg",
+    name = "webrtc_dbg_local",
     srcs = ["libwebrtc_debug.a"],
     hdrs = glob(
         ["include/**/*.h"],

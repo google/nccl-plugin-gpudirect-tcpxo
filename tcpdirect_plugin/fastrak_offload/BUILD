@@ -310,18 +310,6 @@ cc_library(
 )
 
 cc_library(
-    name = "profiler_factory_cloud",
-    srcs = ["profiler_factory_cloud.cc"],
-    hdrs = ["profiler_factory.h"],
-    deps = [
-        ":profiler_factory",
-        ":profiler_interface",
-        ":profiler_noop",
-        "//nccl_cuda:cuda_defs",
-    ],
-)
-
-cc_library(
     name = "profiler_factory_gpuviz",
     srcs = ["profiler_factory_gpuviz.cc"],
     hdrs = [
@@ -348,7 +336,9 @@ cc_library(
 
 cc_binary(
     name = "libnccl-net.so",
+    additional_linker_inputs = ["plugin_symbols.map"],
     features = ["-enable_relr"],
+    linkopts = ["-Wl,--version-script=$(location plugin_symbols.map)"],
     linkshared = True,
     linkstatic = True,
     deps = [

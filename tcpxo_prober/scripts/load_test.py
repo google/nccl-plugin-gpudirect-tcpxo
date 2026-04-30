@@ -14,7 +14,6 @@ import grpc
 import prober_pb2
 import prober_pb2_grpc
 
-
 _NICS = flags.DEFINE_list(
     "nic_ips",
     "",

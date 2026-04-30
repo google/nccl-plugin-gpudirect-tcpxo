@@ -61,14 +61,14 @@ absl::Status UnixSocketClient::Connect() {
     return absl::ErrnoToStatus(
         errno, absl::StrFormat("connect() error: %d", error_number));
   }
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   conn_ = std::make_unique<UnixSocketConnection>(fd);
   return absl::OkStatus();
 }
 
 absl::StatusOr<UnixSocketMessage> UnixSocketClient::MakeRequest(
     UnixSocketMessage msg) {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   conn_->AddMessageToSend(std::move(msg));
   while (conn_->HasPendingMessageToSend()) {
     if (!conn_->Send()) {

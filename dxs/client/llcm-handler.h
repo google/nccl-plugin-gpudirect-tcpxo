@@ -41,7 +41,7 @@ class LlcmHandler : public ControlMessageHandlerInterface {
 
   absl::Status Shutdown(absl::Duration timeout)
       ABSL_LOCKS_EXCLUDED(mutex_) override {
-    absl::MutexLock lock(&mutex_);
+    absl::MutexLock lock(mutex_);
     return slow_handler_->Shutdown(timeout);
   }
 

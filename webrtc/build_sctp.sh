@@ -6,7 +6,7 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 # Webrtc commit to use for building sctp.
-WEBRTC_COMMIT=${2:-"7f614d2a7569e6e01ae4d752967657bc19556c8e"}
+WEBRTC_COMMIT=${2:-"bddd95b63fea8f1baa5461ec4dff23ba1ebac7f9"}
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.

@@ -5,20 +5,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "buffer-manager-client-mock",
-    testonly = 1,
-    hdrs = ["buffer-manager-client_mock.h"],
-    deps = [
-        ":dxs-client-types",
-        "//buffer_mgmt_daemon/client:bounce_buffer_handle",
-        "//buffer_mgmt_daemon/client:buffer_mgr_client-interface",
-        "//testing/base/public:gunit_for_library_testonly",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-    ],
-)
-
-cc_library(
     name = "llcm-memory-interface",
     hdrs = ["llcm-memory-interface.h"],
     deps = ["@com_google_absl//absl/types:span"],
@@ -240,18 +226,6 @@ cc_library(
 )
 
 cc_library(
-    name = "control-message-handler-mocks",
-    testonly = True,
-    hdrs = ["control-message-handler-mocks.h"],
-    deps = [
-        ":control-message-handler-interface",
-        "//testing/base/public:gunit_for_library_testonly",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/types:span",
-    ],
-)
-
-cc_library(
     name = "relaxed-atomic",
     hdrs = ["relaxed-atomic.h"],
 )
@@ -408,25 +382,6 @@ cc_library(
     name = "atomic-future",
     hdrs = ["atomic-future.h"],
     deps = ["@com_google_absl//absl/log:check"],
-)
-
-cc_library(
-    name = "mock_dxs_client",
-    testonly = True,
-    hdrs = ["mock_dxs_client.h"],
-    deps = [
-        ":control-command",
-        ":dxs-client-interface",
-        ":dxs-client-types",
-        ":monotonic-timestamp",
-        "//testing/base/public:gunit_for_library_testonly",
-        "@com_google_absl//absl/base:nullability",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings:string_view",
-        "@com_google_absl//absl/time",
-        "@com_google_absl//absl/types:span",
-    ],
 )
 
 proto_library(

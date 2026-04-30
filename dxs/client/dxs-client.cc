@@ -174,7 +174,7 @@ absl::Status DxsClient::Init(std::string dxs_addr, std::string dxs_port,
     bool awaiting_llcm = enable_llcm && !llcm_info_.has_value();
     return failed_ || (initialized_ && !awaiting_llcm);
   };
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   mu_.Await(absl::Condition(&done));
   if (failed_) {
     return absl::InternalError("Failed to initialize DXS.");
@@ -267,7 +267,7 @@ absl::Status BufferManager::Init(
   auto done = [&]() ABSL_SHARED_LOCKS_REQUIRED(mu_) {
     return failed_ || initialized_;
   };
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   if (!mu_.AwaitWithTimeout(absl::Condition(&done),
                             absl::GetFlag(FLAGS_buffer_manager_init_timeout))) {
     return absl::DeadlineExceededError("Initialize BufferManager timed out.");
@@ -298,7 +298,7 @@ absl::Status BufferManager::Init(
 }
 
 DxsClient::~DxsClient() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   if (!outstanding_listen_sockets_.empty() ||
       !outstanding_data_sockets_.empty() ||
       !outstanding_linearized_recv_ops_.empty() ||
@@ -506,7 +506,7 @@ absl::StatusOr<std::unique_ptr<SendSocketInterface>> DxsClient::Connect(
 absl::StatusOr<absl::Duration> DxsClient::Ping() {
   uint32_t seq;
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     seq = ++ping_seq_;
     outstanding_pings_[seq] = absl::Now();
   }
@@ -517,7 +517,7 @@ absl::StatusOr<absl::Duration> DxsClient::Ping() {
 
   while (true) {
     message_handler().RxPoll();
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     if (failed_ || !outstanding_pings_.contains(seq)) {
       auto result = ping_results_.find(seq);
       if (result == ping_results_.end()) {
@@ -533,12 +533,12 @@ absl::StatusOr<absl::Duration> DxsClient::Ping() {
 std::unique_ptr<SendOpInterface> DxsClient::RegisterSendOp(OpId id) {
   auto state = new SendOp::SharedState();
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     outstanding_send_ops_[id] = absl::WrapUnique(state);
   }
   return MakeUniqueWithCleanup<SendOp>(
       [this, id] {
-        absl::MutexLock l(&mu_);
+        absl::MutexLock l(mu_);
         outstanding_send_ops_.erase(id);
       },
       message_handler(), *state, id);
@@ -548,12 +548,12 @@ std::unique_ptr<LinearizedRecvOpInterface> DxsClient::RegisterLinearizedRecvOp(
     DataSocketHandle handle, OpId id, uint64_t size) {
   auto state = new LinearizedRecvOp::SharedState();
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     outstanding_linearized_recv_ops_[id] = absl::WrapUnique(state);
   }
   return MakeUniqueWithCleanup<LinearizedRecvOp>(
       [this, id] {
-        absl::MutexLock l(&mu_);
+        absl::MutexLock l(mu_);
         outstanding_linearized_recv_ops_.erase(id);
       },
       message_handler(), *state, handle, id);
@@ -566,7 +566,7 @@ std::unique_ptr<RecvSocketInterface> DxsClient::RegisterRecvSocket(
   auto status =
       new RelaxedAtomic<DataSockStatus>(DataSockStatus::kPendingConnect);
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     const bool kAcceptAckSupported = server_version_ >= kAcceptAckVersion;
     if (!kAcceptAckSupported) {
       // If DXS is old and doesn't send an AcceptAck message we directly move
@@ -577,7 +577,7 @@ std::unique_ptr<RecvSocketInterface> DxsClient::RegisterRecvSocket(
   }
   return MakeUniqueWithCleanup<RecvSocket>(
       [this, handle] {
-        absl::MutexLock l(&mu_);
+        absl::MutexLock l(mu_);
         outstanding_data_sockets_.erase(handle);
       },
       message_handler(), *this, next_op_id_, *status, handle, peer);
@@ -588,12 +588,12 @@ std::unique_ptr<SendSocketInterface> DxsClient::RegisterSendSocket(
   auto status =
       new RelaxedAtomic<DataSockStatus>(DataSockStatus::kPendingConnect);
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     outstanding_data_sockets_[handle] = absl::WrapUnique(status);
   }
   return MakeUniqueWithCleanup<SendSocket>(
       [this, handle] {
-        absl::MutexLock l(&mu_);
+        absl::MutexLock l(mu_);
         outstanding_data_sockets_.erase(handle);
       },
       message_handler(), *this, next_op_id_, *status, handle, nic_addr_, peer,
@@ -604,12 +604,12 @@ std::unique_ptr<ListenSocketInterface> DxsClient::RegisterListenSocket(
     ListenSocketHandle handle) {
   auto state = new ListenSocket::SharedState();
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     outstanding_listen_sockets_[handle] = absl::WrapUnique(state);
   }
   return MakeUniqueWithCleanup<ListenSocket>(
       [this, handle] {
-        absl::MutexLock l(&mu_);
+        absl::MutexLock l(mu_);
         outstanding_listen_sockets_.erase(handle);
       },
       message_handler(), *this, next_data_socket_handle_, *state, handle,
@@ -617,12 +617,12 @@ std::unique_ptr<ListenSocketInterface> DxsClient::RegisterListenSocket(
 }
 
 absl::string_view DxsClient::GetServerBuildId() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   return server_build_id_;
 }
 
 uint64_t DxsClient::GetServerVersion() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   return server_version_;
 }
 
@@ -632,7 +632,7 @@ void DxsClient::ReceiveControlMessage(absl::Span<const uint8_t> buffer) {
     return;
   }
   ControlCommand command = static_cast<ControlCommand>(buffer[0]);
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   switch (command) {
     case ControlCommand::kVersionedInitAck:
       return HandleVersionedInitAck(buffer);
@@ -661,7 +661,7 @@ void DxsClient::ReceiveControlMessage(absl::Span<const uint8_t> buffer) {
 }
 
 void DxsClient::OnControlChannelFailure() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   failed_ = true;
   for (auto& [key, op] : outstanding_send_ops_) {
     op->result.store(
@@ -687,7 +687,7 @@ void BufferManager::ReceiveControlMessage(absl::Span<const uint8_t> buffer) {
     return;
   }
   ControlCommand command = static_cast<ControlCommand>(buffer[0]);
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   switch (command) {
     case ControlCommand::kVersionedInitAck:
       return HandleVersionedInitAck(buffer);
@@ -704,7 +704,7 @@ void BufferManager::ReceiveControlMessage(absl::Span<const uint8_t> buffer) {
 }
 
 void BufferManager::OnControlChannelFailure() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   failed_ = true;
 }
 
@@ -713,12 +713,12 @@ bool BufferManager::HealthCheck() const {
 }
 
 absl::string_view BufferManager::GetServerBuildId() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   return server_build_id_;
 }
 
 uint64_t BufferManager::GetServerVersion() {
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   return server_version_;
 }
 
@@ -956,7 +956,7 @@ absl::StatusOr<Reg> BufferManager::RegBufferWithDxsServer(
   const uint64_t kMaxGpaPerMessage =
       (kAvailableBufferSize - sizeof(RegBufferMessage)) / sizeof(iovec);
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     if (outstanding_registrations_ != 0) {
       return absl::FailedPreconditionError(
           "Registrations were left outstanding from a previous failure, cannot "
@@ -979,7 +979,7 @@ absl::StatusOr<Reg> BufferManager::RegBufferWithDxsServer(
     }
 
     {
-      absl::MutexLock l(&mu_);
+      absl::MutexLock l(mu_);
       ++outstanding_registrations_;
     }
     RETURN_IF_ERROR(message_handler().SendControlMessage(absl::MakeSpan(
@@ -995,7 +995,7 @@ absl::StatusOr<Reg> BufferManager::RegBufferWithDxsServer(
   auto done = [this]() ABSL_SHARED_LOCKS_REQUIRED(mu_) {
     return failed_ || outstanding_registrations_ == 0;
   };
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   if (!mu_.AwaitWithTimeout(
           absl::Condition(&done),
           absl::GetFlag(FLAGS_dxs_client_buffer_register_timeout))) {
@@ -1050,7 +1050,7 @@ absl::Status BufferManager::DeregBuffer(Reg reg_handle) {
 
 absl::Status BufferManager::DeregBufferWithDxsServer(Reg reg_handle) {
   {
-    absl::MutexLock l(&mu_);
+    absl::MutexLock l(mu_);
     if (awaiting_unreg_buffer_) {
       return absl::FailedPreconditionError(
           "DeregBuffer is already in progress.");
@@ -1070,7 +1070,7 @@ absl::Status BufferManager::DeregBufferWithDxsServer(Reg reg_handle) {
   auto done = [this]() ABSL_SHARED_LOCKS_REQUIRED(mu_) {
     return failed_ || !awaiting_unreg_buffer_;
   };
-  absl::MutexLock l(&mu_);
+  absl::MutexLock l(mu_);
   if (!mu_.AwaitWithTimeout(
           absl::Condition(&done),
           absl::GetFlag(FLAGS_dxs_client_buffer_deregister_timeout))) {

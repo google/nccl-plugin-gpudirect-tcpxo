@@ -2,7 +2,6 @@ load("@grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("@rules_python//python:defs.bzl", "py_binary")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -103,21 +102,11 @@ cc_binary(
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/log:flags",
+        "@com_google_absl//absl/log:initialize",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@grpc//:grpc++",
-    ],
-)
-
-py_binary(
-    name = "load_test",
-    srcs = ["scripts/load_test.py"],
-    deps = [
-        "//net/grpc/python:grpc",
-        "//third_party/py/absl:app",
-        "//third_party/py/absl/flags",
-        "//third_party/py/absl/logging",
     ],
 )
 

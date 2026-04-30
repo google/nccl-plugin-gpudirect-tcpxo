@@ -72,7 +72,7 @@ SctpHandler::SctpHandler(
       socket_factory_(std::move(socket_factory)) {}
 
 bool SctpHandler::Init() {
-  absl::MutexLock lock(&mu_);
+  absl::MutexLock lock(mu_);
   int recv_buffer_size = 5 * 1024 * 1024;
   if (setsockopt(socket_fd_, SOL_SOCKET, SO_RCVBUF, &recv_buffer_size,
                  sizeof(recv_buffer_size)) < 0) {
@@ -127,7 +127,7 @@ bool SctpHandler::Init() {
 }
 
 absl::Status SctpHandler::Shutdown(absl::Duration timeout) {
-  absl::MutexLock lock(&mu_);
+  absl::MutexLock lock(mu_);
   if (running_) {
     shutting_down_ = true;
     auto disconnected = [this]() ABSL_SHARED_LOCKS_REQUIRED(mu_) {
@@ -167,7 +167,7 @@ void SctpHandler::RunSctpHandler() {
     // Granularity of timers is 1ms, just sleep for 1ms to avoid unnecessarily
     // pulling data off the socket.
     absl::SleepFor(absl::Milliseconds(1));
-    absl::MutexLock lock(&mu_);
+    absl::MutexLock lock(mu_);
 
     // First check if we should exit.
     if (!running_) {
@@ -207,7 +207,7 @@ absl::Status SctpHandler::SendControlMessage(absl::Span<const uint8_t> buffer) {
     return absl::InvalidArgumentError("Zero-byte payloads are not allowed.");
   }
 
-  absl::MutexLock lock(&mu_);
+  absl::MutexLock lock(mu_);
   if (!connected_) {
     return absl::FailedPreconditionError("SCTP handler is not connected.");
   }
@@ -272,11 +272,11 @@ void SctpHandler::ReadSocket() {
   active_receive_ = true;
   while (!receive_buffer_.empty()) {
     auto received = std::exchange(receive_buffer_, {});
-    mu_.Unlock();
+    mu_.unlock();
     for (const auto& message : received) {
       Receiver().ReceiveControlMessage(message.payload());
     }
-    mu_.Lock();
+    mu_.lock();
   }
   active_receive_ = false;
 }

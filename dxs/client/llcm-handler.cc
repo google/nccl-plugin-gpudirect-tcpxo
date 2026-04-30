@@ -54,7 +54,7 @@ absl::Status LlcmHandler::SendControlMessage(absl::Span<const uint8_t> buffer) {
 }
 
 void LlcmHandler::RxPoll() {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   absl::StatusCode code = TrySendLlcmOverflow();
   if (code != absl::StatusCode::kOk &&
       code != absl::StatusCode::kResourceExhausted) {
@@ -72,7 +72,7 @@ void LlcmHandler::RxPoll() {
 }
 
 bool LlcmHandler::LlcmRecvTest() {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   return LlcmRecv();
 }
 
@@ -111,7 +111,7 @@ bool LlcmHandler::LlcmRecv() {
 }
 
 absl::Status LlcmHandler::LlcmSend(absl::Span<const uint8_t> buffer) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   DCHECK(llcmq_ != nullptr);
 
   return LlcmSendLockHeld(buffer);

@@ -1,20 +1,17 @@
 diff --git a/util.sh b/util.sh
-index d889fb4..98315c7 100644
+index d889fb4..abcf322 100644
 --- a/util.sh
 +++ b/util.sh
-@@ -233,12 +233,14 @@ function compile-unix() {
-   local outputdir="$1"
-   local gn_args="$2"
+@@ -235,10 +235,12 @@ function compile-unix() {
    local blacklist="unittest|examples|/yasm|protobuf_lite|main.o|\
--video_capture_external.o|device_info_external.o"
-+video_capture_external.o|device_info_external.o|abseil"
-
+ video_capture_external.o|device_info_external.o"
+ 
 +  sed -i '/complete_static_lib.*/d' BUILD.gn
 +  sed -i 's/use_debug_fission = *$/use_debug_fission = \!is_linux \&\&/g' build/config/compiler/compiler.gni
    gn gen $outputdir --args="$gn_args"
    pushd $outputdir >/dev/null
 -  ninja -C .
-
+ 
 +  ninja -C . :dcsctp
    rm -f libwebrtc_full.a
    # Produce an ordered objects list by parsing .ninja_deps for strings
@@ -27,7 +24,7 @@ index d889fb4..98315c7 100644
 +
    popd >/dev/null
  }
-
+ 
 @@ -278,6 +282,7 @@ function compile() {
    pushd $outdir/src >/dev/null
    for cfg in $configs; do
@@ -43,5 +40,5 @@ index d889fb4..98315c7 100644
 -        target_args+=" is_clang=false use_sysroot=false"
 +        target_args+=" is_clang=false use_sysroot=false use_custom_libcxx=false"
        fi
-
+ 
        # Debug builds are component builds (shared libraries) by default unless

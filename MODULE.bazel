@@ -8,9 +8,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 
 http_archive(
     name = "ortools",
-    sha256 = "de7a743c8ec097ab8906c1e00ea782ee8a4fe4ec297e15d7bdf3a187b2f8829c",
-    strip_prefix = "or-tools-9.12",
-    url = "https://github.com/google/or-tools/archive/refs/tags/v9.12.tar.gz",
+    sha256 = "6395a00a97ff30af878ee8d7fd5ad0ab1c7844f7219182c6d71acbee1b5f3026",
+    strip_prefix = "or-tools-9.15",
+    url = "https://github.com/google/or-tools/archive/refs/tags/v9.15.tar.gz",
 )
 
 http_archive(
@@ -42,16 +42,16 @@ http_archive(
     name = "com_google_tensorflow_serving",
     patch_strip = 1,
     patches = ["//patches:tf_serving.patch"],
-    sha256 = "6e23788774f241ba980425c7e2a6c89f173ab8739e898ef637f6720c15e53366",
-    strip_prefix = "serving-ddaaf0b38604ecc9d49c9e9d2a17df35ade4485a",
-    url = "https://github.com/tensorflow/serving/archive/ddaaf0b.zip",
+    sha256 = "82ca04a9debf9f13985ecb7e29edf1ad0b68473d14d37e503f9f021b45850257",
+    strip_prefix = "serving-2.19.1",
+    url = "https://github.com/tensorflow/serving/archive/refs/tags/2.19.1.zip",
 )
 
 http_archive(
     name = "ng-log",
-    sha256 = "03a0c7176290f15c3fc1f3826b8ffc2c7a3e9b996b42bc599038fe49546cbe53",
-    strip_prefix = "ng-log-0.8.0-rc1",
-    url = "https://github.com/ng-log/ng-log/archive/refs/tags/v0.8.0-rc1.tar.gz",
+    sha256 = "7c5f0ee8dd44aa0935c9a9c5061a06d64d2fa1a08d5b1d6b5444ec7323d70c7a",
+    strip_prefix = "ng-log-0.8.2",
+    url = "https://github.com/ng-log/ng-log/archive/refs/tags/v0.8.2.zip",
 )
 
 http_archive(
@@ -64,29 +64,73 @@ http_archive(
 
 http_archive(
     name = "ecclesia",
-    sha256 = "54ee8a16f2e8df5cf2419b9565469584bcda2543d4dfee7a0b5add7f751e62b7",
-    strip_prefix = "ecclesia-machine-management-305a118baa4fbf108f718d98f243cc38e6311daf",
-    url = "https://github.com/google/ecclesia-machine-management/archive/305a118.zip",
+    sha256 = "2dbbb6894202932d08da2812729c7a6f2b2e279ac31a6ac2c8b7be7ca149d0b2",
+    strip_prefix = "ecclesia-machine-management-152808cf1a95acedf62892f8504079066c91a327",
+    url = "https://github.com/google/ecclesia-machine-management/archive/152808c.zip",
 )
 
-bazel_dep(name = "rules_cc", version = "0.1.1")
-bazel_dep(name = "rules_license", version = "1.0.0")
-bazel_dep(name = "rules_python", version = "1.6.3")
-bazel_dep(name = "abseil-cpp", version = "20250127.0", repo_name = "com_google_absl")
-bazel_dep(name = "gflags", version = "2.2.2")
-bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1")
-bazel_dep(name = "googleapis-cc", version = "1.0.0")
-bazel_dep(name = "platforms", version = "0.0.11")
-bazel_dep(name = "protobuf", version = "30.0")
-bazel_dep(name = "rules_cuda", version = "0.2.5")
-bazel_dep(name = "zlib", version = "1.3.1.bcr.5")
-bazel_dep(name = "grpc", version = "1.71.0")
-bazel_dep(name = "boost.asio", version = "1.88.0.bcr.2")
+bazel_dep(
+    name = "rules_cc",
+    version = "0.2.16",
+)
+bazel_dep(
+    name = "rules_license",
+    version = "1.0.0",
+)
+bazel_dep(
+    name = "rules_python",
+    version = "1.8.3",
+)
+bazel_dep(
+    name = "abseil-cpp",
+    version = "20260107.0",
+    repo_name = "com_google_absl",
+)
+bazel_dep(
+    name = "gflags",
+    version = "2.2.2",
+)
+bazel_dep(
+    name = "googleapis",
+    version = "0.0.0-20260130-c0fcb356",
+)
+bazel_dep(
+    name = "googleapis-cc",
+    version = "1.0.0",
+)
+bazel_dep(
+    name = "platforms",
+    version = "1.0.0",
+)
+bazel_dep(
+    name = "protobuf",
+    version = "33.4",
+)
+bazel_dep(
+    name = "rules_cuda",
+    version = "0.2.5",
+)
+bazel_dep(
+    name = "zlib",
+    version = "1.3.1.bcr.8",
+)
+bazel_dep(
+    name = "grpc",
+    version = "1.76.0",
+)
+bazel_dep(
+    name = "boost.asio",
+    version = "1.89.0.bcr.2",
+)
 single_version_override(
     module_name = "protobuf",
     patch_strip = 1,
     patches = ["//patches:protobuf_undefined.patch"],
-    version = "30.0",
+)
+single_version_override(
+    module_name = "grpc",
+    patch_strip = 1,
+    patches = ["//patches:grpc.patch"],
 )
 
 cuda = use_extension("@rules_cuda//cuda:extensions.bzl", "toolchain")
@@ -95,14 +139,6 @@ cuda.local_toolchain(
     toolkit_path = "",
 )
 use_repo(cuda, "local_cuda")
-
-# Override with nullability changes
-archive_override(
-    module_name = "abseil-cpp",
-    integrity = "sha256-4GHBmw1JDdhBemoAacxjD2xORVftIDZ1GgPZ6lN03UE=",
-    strip_prefix = "abseil-cpp-7bb1ccb703bcb5a55bb39a4def2c19d85a7eec33",
-    url = "https://github.com/abseil/abseil-cpp/archive/7bb1ccb.zip",
-)
 
 new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
 new_local_repository(
@@ -115,4 +151,55 @@ new_local_repository(
     name = "cuda_headers",
     build_file = "third_party/cuda_headers/BUILD",
     path = "/usr/local/cuda",
+)
+
+new_local_repository(
+    name = "webrtc",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "webrtc",
+    srcs = ["libwebrtc.a"],
+    hdrs = glob(
+        ["include/**/*.h"],
+        allow_empty = True,
+        exclude = ["include/third_party/**/*.h"],
+    ),
+    includes = ["include"],
+    defines = [
+        "WEBRTC_POSIX",
+        "WEBRTC_LINUX",
+        "WEBRTC_ENABLE_SYMBOL_EXPORT",
+    ],
+    linkopts = [
+        "-ldl",
+        "-pthread",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "webrtc_dbg",
+    srcs = ["libwebrtc_debug.a"],
+    hdrs = glob(
+        ["include/**/*.h"],
+        allow_empty = True,
+        exclude = ["include/third_party/**/*.h"],
+    ),
+    includes = ["include"],
+    defines = [
+        "WEBRTC_POSIX",
+        "WEBRTC_LINUX",
+    ],
+    linkopts = [
+        "-ldl",
+        "-pthread",
+    ],
+    alwayslink = 1,
+)
+""",
+    path = "/usr/local/webrtc",
 )

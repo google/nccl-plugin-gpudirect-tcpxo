@@ -254,17 +254,6 @@ cc_binary(
     ],
 )
 
-cc_binary(
-    name = "mtest_fastrak_gpumem_manager",
-    features = ["-enable_relr"],
-    linkopts = ["-Wl,--dynamic-linker=/lib64/ld-linux-x86-64.so.2"],
-    linkstatic = True,
-    deps = [
-        ":fastrak_gpumem_manager_lib",
-        ":google_pthread_signal_safe_key_create",
-    ],
-)
-
 cc_library(
     name = "clock_interface",
     hdrs = ["clock_interface.h"],

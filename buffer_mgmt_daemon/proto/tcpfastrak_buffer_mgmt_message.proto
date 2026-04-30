@@ -6,12 +6,16 @@
  * https://developers.google.com/open-source/licenses/bsd
  */
 
-edition = "2023";
+edition = "2024";
 
 package tcpdirect;
 
 import "google/rpc/status.proto";
 
+import option "google/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = STRING;
+option features.(pb.cpp).enum_name_uses_string_view = false;
 option features.enum_type = CLOSED;
 option features.utf8_validation = NONE;
 

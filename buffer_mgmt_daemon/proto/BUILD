@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 proto_library(
     name = "tcpfastrak_buffer_mgmt_message_proto",
     srcs = ["tcpfastrak_buffer_mgmt_message.proto"],
+    option_deps = ["@protobuf//:cpp_features_proto"],
     deps = ["@googleapis//google/rpc:status_proto"],
 )
 

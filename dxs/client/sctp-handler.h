@@ -69,7 +69,7 @@ class SctpHandler : public ControlMessageHandlerInterface,
   // See ControlMessageHandlerInterface.
   absl::Status SendControlMessage(absl::Span<const uint8_t> buffer) override;
   void RxPoll() override {
-    absl::MutexLock lock(&mu_);
+    absl::MutexLock lock(mu_);
     ReadSocket();
   };
 
@@ -79,7 +79,7 @@ class SctpHandler : public ControlMessageHandlerInterface,
   }
 
   bool HealthCheck() const override {
-    absl::MutexLock lock(&mu_);
+    absl::MutexLock lock(mu_);
     return connected_;
   }
 

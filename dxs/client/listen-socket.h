@@ -44,12 +44,12 @@ class ListenSocket : public ListenSocketInterface {
     RelaxedAtomic<int> port_{0};
 
     void AddPendingConnection(WireSocketAddr peer_saddr) {
-      absl::MutexLock l(&mutex_);
+      absl::MutexLock l(mutex_);
       pending_connections_.push_back(WireSocketAddr(peer_saddr));
     }
 
     std::optional<WireSocketAddr> PopPendingConnection() {
-      absl::MutexLock l(&mutex_);
+      absl::MutexLock l(mutex_);
       if (pending_connections_.empty()) {
         return std::nullopt;
       }
