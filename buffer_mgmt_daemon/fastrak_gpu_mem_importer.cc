@@ -252,7 +252,7 @@ absl::Status FasTrakGpuMemImporter::InitializeServers() {
 void FasTrakGpuMemImporter::AddConnectedClient(int client,
                                                NicBinding& binding) {
   binding.resource_tracker->RegisterClient(client);
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   auto [_, inserted] = connected_clients_.insert(client);
   if (!inserted) {
     return;
@@ -263,7 +263,7 @@ void FasTrakGpuMemImporter::AddConnectedClient(int client,
 void FasTrakGpuMemImporter::RemoveConnectedClient(int client,
                                                   NicBinding& binding) {
   CleanUp(client, binding);
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   connected_clients_.erase(client);
   LOG(INFO) << "Memory importer: Removed client: " << client;
 

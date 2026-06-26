@@ -46,7 +46,7 @@ class NicClientRouter : public NicClientRouterInterface {
   GetBufferManagerClient(absl::string_view dxs_addr) override;
 
   void Shutdown() override {
-    absl::MutexLock lock(&mu_);
+    absl::MutexLock lock(mu_);
     for (auto& [id, client] : ip_addr_to_client_) {
       absl::Status result =
           client.dxs_client->Shutdown(/*timeout=*/absl::Seconds(1));

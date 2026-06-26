@@ -1,5 +1,6 @@
+#CUDA-related components for NCCL FasTrak plugin
+
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@rules_cuda//cuda:defs.bzl", "cuda_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -9,7 +10,7 @@ cc_library(
     deps = ["@cuda_headers"],
 )
 
-cuda_library(
+cc_library(
     name = "cuda_common",
     srcs = ["cuda_common.cc"],
     hdrs = ["cuda_common.h"],
@@ -25,7 +26,6 @@ cuda_library(
         "@com_google_absl//absl/strings:string_view",
         "@cuda_headers",
         "@local_cuda//:cuda",
-        "@local_cuda//:cuda_runtime",
         "@nccl//:plugin_lib",
     ],
 )

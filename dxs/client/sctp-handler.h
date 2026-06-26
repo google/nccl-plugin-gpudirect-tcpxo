@@ -29,7 +29,7 @@
 #include "api/units/timestamp.h"
 #include "dxs/client/control-message-handler-interface.h"
 #include "dxs/client/thread-shim.h"
-#include "dxs/sctp-timeout-queue.h"
+#include "dxs/sctp-timeout-queue-base.h"
 #include "net/dcsctp/public/dcsctp_message.h"
 #include "net/dcsctp/public/dcsctp_socket.h"
 #include "net/dcsctp/public/dcsctp_socket_factory.h"
@@ -184,7 +184,7 @@ class SctpHandler : public ControlMessageHandlerInterface,
   uint16_t remote_port_;
   Mode mode_;
   std::unique_ptr<dcsctp::DcSctpSocketFactory> socket_factory_;
-  std::unique_ptr<SctpTimeoutQueue> timeout_queue_ ABSL_GUARDED_BY(mu_);
+  std::unique_ptr<SctpTimeoutQueueBase> timeout_queue_ ABSL_GUARDED_BY(mu_);
   // Must be after timeout_queue_, as it hold references to timeouts.
   std::unique_ptr<dcsctp::DcSctpSocketInterface> sctp_socket_
       ABSL_GUARDED_BY(mu_);

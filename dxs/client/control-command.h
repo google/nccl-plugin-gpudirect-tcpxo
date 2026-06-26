@@ -61,7 +61,7 @@ enum class ControlCommand : uint8_t {
   kSubscribeToPeriodicStats = 52,
   kPeriodicStatsUpdate = 53,
   kIncomingConnectionV2 = 55,
-  kNumControlCommands = 60,  // Not an actual command.
+  kNumControlCommands = 71,  // Not an actual command.
 };
 // CHANGES TO THIS ENUM ARE NOT BACKWARDS COMPATIBLE.
 //

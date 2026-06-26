@@ -23,8 +23,6 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "curand_kernel.h"
 #include "driver_types.h"
 #include "dxs/client/oss/status_macros.h"
 #include "nccl.h"
@@ -56,25 +54,19 @@ const char* GetNcclErrorString(ncclResult_t code) {
 namespace fastrak {
 
 absl::StatusOr<int> GetDeviceIndex() {
-  int device;
-  RETURN_IF_ERROR(cuda_call_success(cudaGetDevice(&device)));
-  return device;
+  CUdevice device;
+  RETURN_IF_ERROR(cu_call_success(cuCtxGetDevice(&device)));
+  return static_cast<int>(device);
 }
 
 absl::StatusOr<gpuDev> initGpuDev() {
   gpuDev gpu;
-  RETURN_IF_ERROR(cuda_call_success(cudaGetDevice(&gpu.dev)));
-  RETURN_IF_ERROR(cuda_call_success(
-      cudaDeviceGetPCIBusId(gpu.pci_addr, kPciAddrLen, gpu.dev)));
+  RETURN_IF_ERROR(cu_call_success(cuCtxGetDevice(&gpu.dev)));
+  RETURN_IF_ERROR(
+      cu_call_success(cuDeviceGetPCIBusId(gpu.pci_addr, kPciAddrLen, gpu.dev)));
   RETURN_IF_ERROR(cu_call_success(cuDeviceGetAttribute(
       &gpu.freq, CU_DEVICE_ATTRIBUTE_CLOCK_RATE, gpu.dev)));
   return gpu;
-}
-
-absl::StatusOr<int> getDeviceId(const void* ptr) {
-  cudaPointerAttributes attrs;
-  RETURN_IF_ERROR(cuda_call_success(cudaPointerGetAttributes(&attrs, ptr)));
-  return attrs.type == cudaMemoryTypeDevice ? attrs.device : -1;
 }
 
 namespace {}  // namespace
@@ -122,20 +114,6 @@ absl::Status cu_call_success(CUresult err) {
   return absl::OkStatus();
 }
 
-absl::Status cuda_call_success(cudaError_t err) {
-  if (err != cudaSuccess) {
-    const char* name = cudaGetErrorName(err);
-    const char* reason = cudaGetErrorString(err);
-    if (name == nullptr || reason == nullptr) {
-      return absl::InternalError(absl::StrFormat(
-          "Faile to get error name and reason from CUDA error %d", err));
-    }
-    return absl::InternalError(absl::StrFormat(
-        "cuda error detected! name: %s; string: %s", name, reason));
-  }
-  return absl::OkStatus();
-}
-
 absl::Status nccl_call_success(ncclResult_t err) {
   if (err != ncclSuccess) {
     const char* name = GetNcclErrorString(err);
@@ -145,86 +123,6 @@ absl::Status nccl_call_success(ncclResult_t err) {
     }
     return absl::InternalError(
         absl::StrFormat("nccl error detected! name: %s.", name));
-  }
-  return absl::OkStatus();
-}
-
-/**
- * Random number generator kernel for generation/validation.
- * If match == nullptr, then the default behavior is to generate, otherwise
- * validate.
- */
-__global__ void rng_kernel(uint64_t seed, uint32_t* data, uint64_t num_elems,
-                           volatile bool* match) {
-  curandState state;
-  curand_init(seed, threadIdx.x, 0, &state);
-  __shared__ bool mismatch_happened;
-  if (threadIdx.x == 0) {
-    mismatch_happened = false;
-  }
-  __syncthreads();
-  for (uint64_t i = threadIdx.x; i < num_elems; i += blockDim.x) {
-    if (mismatch_happened) {
-      break;
-    }
-    uint32_t rand_num = curand(&state);
-    /* Populate the first and last element of the buffer with special values
-       (current seed and the next seed) for debugging purposes, telling us if
-       data has been corrupted. */
-    if (i == 0) {
-      rand_num = seed;
-    } else if (i == num_elems - 1) {
-      rand_num = seed + 1;
-    }
-    if (match == nullptr) {
-      // Generation mode
-      data[i] = rand_num;
-    } else {
-      // Validation mode
-      if (data[i] != rand_num) {
-        mismatch_happened = true;
-        break;
-      }
-    }
-  }
-  __syncthreads();
-  if (threadIdx.x == 0 && match != nullptr) {
-    *match = !mismatch_happened;
-    if (mismatch_happened) {
-      printf("Start of array has value %u, expected value %lu.\n", data[0],
-             seed);
-      printf("End of array has value %u, expected value %lu.\n",
-             data[num_elems - 1], seed + 1);
-    }
-  }
-}
-
-absl::Status GeneratePayload(int seed, void* ptr, uint64_t size) {
-  uint64_t num_elems = size / sizeof(uint32_t);
-  rng_kernel<<<1, 1024, 0>>>(seed, reinterpret_cast<uint32_t*>(ptr), num_elems,
-                             nullptr);
-  RETURN_IF_ERROR(cuda_call_success(cudaStreamSynchronize(CU_STREAM_LEGACY)));
-  return absl::OkStatus();
-}
-
-absl::Status ValidatePayload(int seed, void* ptr, uint64_t size) {
-  uint64_t num_elems = size / sizeof(uint32_t);
-  void* match;
-  CUdeviceptr match_device;
-  RETURN_IF_ERROR(cu_call_success(
-      cuMemHostAlloc(&match, sizeof(bool),
-                     CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP)));
-  auto dealloc_mem = absl::MakeCleanup([match] { cuMemFreeHost(match); });
-  RETURN_IF_ERROR(
-      cu_call_success(cuMemHostGetDevicePointer(&match_device, match, 0)));
-  rng_kernel<<<1, 1024, 0>>>(seed, reinterpret_cast<uint32_t*>(ptr), num_elems,
-                             reinterpret_cast<bool*>(match_device));
-  RETURN_IF_ERROR(cuda_call_success(cudaStreamSynchronize(CU_STREAM_LEGACY)));
-  if (!*reinterpret_cast<bool*>(match)) {
-    return absl::InternalError(
-        absl::StrFormat("GpuRandomPayloadGenerator: Payload content does not "
-                        "match random numbers generated with seed %d",
-                        seed));
   }
   return absl::OkStatus();
 }

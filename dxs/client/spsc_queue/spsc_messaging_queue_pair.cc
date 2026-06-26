@@ -33,7 +33,7 @@ namespace {
 
 // Return the largest multiple of 'align' which is <= x (x >= 0).
 template <typename T>
-inline constexpr T AlignDownTo(T x, T align) {
+constexpr T AlignDownTo(T x, T align) {
   DCHECK_GE(x, 0);
   DCHECK_GT(align, 0);
   return align * (x / align);
@@ -41,7 +41,7 @@ inline constexpr T AlignDownTo(T x, T align) {
 
 // Return the smallest multiple of 'align' which is >= x (x >= 0).
 template <typename T>
-inline constexpr T AlignUpTo(T x, T align) {
+constexpr T AlignUpTo(T x, T align) {
   return AlignDownTo(x + align - 1, align);
 }
 
@@ -128,7 +128,8 @@ absl::StatusCode SpscMessagingQueuePair::Receive(
                      ->body_bytes;
     batch.RemovePrefix(sizeof(MessageHeader));
   }
-  if (batch.RemainingBytes() < body_bytes) {
+  const uint64_t padding_bytes = PaddingBytes(body_bytes);
+  if (batch.RemainingBytes() < body_bytes + padding_bytes) {
     LOG_EVERY_N_SEC(DFATAL, 1) << "Message received but incomplete";
     return absl::StatusCode::kUnavailable;
   }
@@ -142,7 +143,6 @@ absl::StatusCode SpscMessagingQueuePair::Receive(
   }
   batch.RemovePrefix(body_bytes);
   // padding
-  const uint64_t padding_bytes = PaddingBytes(body_bytes);
   status = batch.RemovePrefix(padding_bytes);
   if (status != absl::StatusCode::kOk) return status;
 

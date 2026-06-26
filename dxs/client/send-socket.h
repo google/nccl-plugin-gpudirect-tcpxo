@@ -93,6 +93,7 @@ class SendSocket : public SendSocketInterface {
     RETURN_IF_ERROR(handler_.SendMessage(&message));
     return new_op;
   }
+
   std::string Address() const override { return nic_addr_; }
 
   WireSocketAddr Peer() const override { return peer_; }

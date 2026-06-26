@@ -24,7 +24,7 @@
 namespace tcpdirect {
 
 FastrakBufferResourceTracker::~FastrakBufferResourceTracker() {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   for (const auto& [client, reg_dmabufs] : client_reg_handles_) {
     for (const auto& [reg_handle, dmabuf_info] : reg_dmabufs) {
       if (close(dmabuf_info.dmabuf_fd) != 0) {
@@ -39,7 +39,7 @@ absl::Status FastrakBufferResourceTracker::TrackBuffer(int client,
                                                        int dmabuf_fd,
                                                        DmabufId dmabuf_id,
                                                        dxs::Reg reg_handle) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   if (!client_reg_handles_.contains(client)) {
     return absl::InternalError(
         absl::StrFormat("Client %d not found in resource tracker", client));
@@ -56,7 +56,7 @@ absl::Status FastrakBufferResourceTracker::TrackBuffer(int client,
 
 absl::StatusOr<FastrakBufferResourceTracker::DmabufId>
 FastrakBufferResourceTracker::GetDmabufId(int client, dxs::Reg reg_handle) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   if (!client_reg_handles_.contains(client)) {
     return absl::InternalError(
         absl::StrFormat("Client %d not found in fetching dma buffer id for %d",
@@ -72,7 +72,7 @@ FastrakBufferResourceTracker::GetDmabufId(int client, dxs::Reg reg_handle) {
 
 absl::StatusOr<std::vector<dxs::Reg>>
 FastrakBufferResourceTracker::GetRegHandles(int client) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   if (!client_reg_handles_.contains(client)) {
     return absl::NotFoundError(
         absl::StrFormat("Client %d not found in resource tracker", client));
@@ -88,7 +88,7 @@ FastrakBufferResourceTracker::GetRegHandles(int client) {
 }
 
 std::vector<int> FastrakBufferResourceTracker::GetClients() {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   std::vector<int> clients;
   for (const auto& entry : client_reg_handles_) {
     clients.push_back(entry.first);
@@ -97,20 +97,20 @@ std::vector<int> FastrakBufferResourceTracker::GetClients() {
 }
 
 void FastrakBufferResourceTracker::RegisterClient(int client) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   if (!client_reg_handles_.contains(client)) {
     client_reg_handles_[client] = {};
   }
 }
 
 void FastrakBufferResourceTracker::UnregisterClient(int client) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   client_reg_handles_.erase(client);
 }
 
 absl::Status FastrakBufferResourceTracker::UntrackBuffer(int client,
                                                          dxs::Reg reg_handle) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   if (!client_reg_handles_.contains(client)) {
     return absl::InternalError(absl::StrFormat(
         "Client %d not found in untracking reg buffer %d", client, reg_handle));

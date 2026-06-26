@@ -41,7 +41,7 @@
 #include "dxs/client/control-message-handler-interface.h"
 #include "dxs/client/guest-clock.h"
 #include "dxs/client/thread-shim.h"
-#include "dxs/sctp-timeout-queue.h"
+#include "dxs/sctp-timeout-queue-base.h"
 #include "net/dcsctp/public/dcsctp_message.h"
 #include "net/dcsctp/public/dcsctp_options.h"
 #include "net/dcsctp/public/dcsctp_socket.h"
@@ -113,8 +113,8 @@ bool SctpHandler::Init() {
   options.avoid_fragmentation_cwnd_mtus = 1 << 16;
   options.mtu = mtu_ - sizeof(ip6_hdr) - sizeof(udphdr);
 
-  timeout_queue_ =
-      std::make_unique<SctpTimeoutQueue>(*this, GlobalGuestClock::GetClock());
+  timeout_queue_ = std::make_unique<SctpTimeoutQueueBase>(
+      *this, GlobalGuestClock::GetClock());
   sctp_socket_ = socket_factory_->Create(id_, *this, nullptr, options);
   if (mode_ == Mode::kClient) {
     sctp_socket_->Connect();

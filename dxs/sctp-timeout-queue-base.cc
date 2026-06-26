@@ -6,7 +6,7 @@
  * https://developers.google.com/open-source/licenses/bsd
  */
 
-#include "dxs/sctp-timeout-queue.h"
+#include "dxs/sctp-timeout-queue-base.h"
 
 #include <cstdint>
 
@@ -33,6 +33,7 @@ void SctpTimeout::Stop() {
     heap_index_ = -1;
   }
 }
+
 void SctpTimeout::Restart(DurationMs duration, TimeoutID timeout_id) {
   DCHECK_NE(heap_index_, -1);
   timeout_id_ = timeout_id;
@@ -40,12 +41,13 @@ void SctpTimeout::Restart(DurationMs duration, TimeoutID timeout_id) {
   parent_queue_.UpdateTimeout(this);
 }
 
-SctpTimeoutQueue::SctpTimeoutQueue(SctpTimeoutHandlerInterface& timeout_handler,
-                                   const ClockInterface& clock)
+SctpTimeoutQueueBase::SctpTimeoutQueueBase(
+    SctpTimeoutHandlerInterface& timeout_handler, const ClockInterface& clock)
     : timeout_handler_(timeout_handler), clock_(clock) {}
 
-void SctpTimeoutQueue::Run() {
+bool SctpTimeoutQueueBase::Run() {
   auto now = clock_.GetTime();
+  bool did_work = false;
 
   while (!timeouts_.IsEmpty()) {
     SctpTimeout* timeout = timeouts_.Top();
@@ -56,13 +58,13 @@ void SctpTimeoutQueue::Run() {
       // Stop() will pop this timeout off the queue.
       DCHECK(timeouts_.IsEmpty() || timeouts_.Top() != timeout);
       timeout_handler_.HandleTimeout(timeout->GetTimeoutID());
-
+      did_work = true;
     } else {
       // No more timers are expired.
       break;
     }
   }
-  return;
+  return did_work;
 }
 
 }  // namespace dxs

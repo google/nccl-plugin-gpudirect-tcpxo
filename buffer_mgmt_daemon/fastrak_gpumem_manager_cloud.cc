@@ -46,7 +46,7 @@ FastrakGpumemManagerCloud::FastrakGpumemManagerCloud(
         "/health",
         [this](tensorflow::serving::net_http::ServerRequestInterface* request) {
           request->OverwriteResponseHeader("Content-Type", "application/json");
-          absl::MutexLock lock(&mutex_);
+          absl::MutexLock lock(mutex_);
           auto resp_body_json = GetHealthCheckResponseJson();
           request->WriteResponseString(resp_body_json.dump());
           switch (health_status_) {
@@ -74,7 +74,7 @@ absl::Status FastrakGpumemManagerCloud::Setup() { return absl::OkStatus(); }
 
 void FastrakGpumemManagerCloud::SetHealthStatus(HealthStatus status,
                                                 absl::string_view message) {
-  absl::MutexLock lock(&mutex_);
+  absl::MutexLock lock(mutex_);
   switch (health_status_) {
     case HealthStatus::kInitializing:
       if (status == HealthStatus::kHealthy) {

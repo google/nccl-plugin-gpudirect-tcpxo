@@ -32,20 +32,4 @@ bool CUCallSuccess(CUresult err) {
   return true;
 }
 
-bool CUDACallSuccess(cudaError_t err) {
-  if (err != cudaSuccess) {
-    const char* name = cudaGetErrorName(err);
-    const char* reason = cudaGetErrorString(err);
-    if (name == nullptr || reason == nullptr) {
-      LOG(FATAL) << "Failed to get error name and reason from CUDA error "
-                 << err;
-      return false;
-    }
-    LOG(ERROR) << absl::StrFormat("cuda error detected! name: %s; string: %s",
-                                  name, reason);
-    return false;
-  }
-  return true;
-}
-
 }  // namespace tcpdirect

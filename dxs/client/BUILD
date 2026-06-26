@@ -203,7 +203,7 @@ cc_library(
         ":control-message-handler-interface",
         ":guest-clock",
         ":thread-shim",
-        "//dxs:sctp-timeout-queue",
+        "//dxs:sctp-timeout-queue-base",
         "//webrtc",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/cleanup",
@@ -322,6 +322,10 @@ cc_library(
 cc_library(
     name = "dxs-client-types",
     hdrs = ["dxs-client-types.h"],
+    deps = [
+        "@com_google_absl//absl/numeric:int128",
+        "@com_google_absl//absl/strings:str_format",
+    ],
 )
 
 cc_library(

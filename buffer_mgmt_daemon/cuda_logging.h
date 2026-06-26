@@ -12,7 +12,6 @@
 #include "absl/log/log.h"
 #include "absl/strings/str_format.h"
 #include "cuda.h"
-#include "cuda_runtime_api.h"
 
 namespace tcpdirect {
 
@@ -27,17 +26,6 @@ namespace tcpdirect {
     if (cuGetErrorString(__err, &reason)) {                                    \
       LOG(ERROR) << "Error: error getting error string";                       \
     }                                                                          \
-    LOG(FATAL) << absl::StrFormat("cuda error detected! name: %s; string: %s", \
-                                  name, reason);                               \
-  }                                                                            \
-  }                                                                            \
-  }
-
-#define CUDA_ASSERT_SUCCESS(expr)                                              \
-  {{cudaError_t __err = (expr);                                                \
-  if (__err != cudaSuccess) {                                                  \
-    const char* name = cudaGetErrorName(__err);                                \
-    const char* reason = cudaGetErrorString(__err);                            \
     LOG(FATAL) << absl::StrFormat("cuda error detected! name: %s; string: %s", \
                                   name, reason);                               \
   }                                                                            \
@@ -62,21 +50,7 @@ namespace tcpdirect {
   }                                                                            \
   }
 
-#define CUDA_ASSERT_SUCCESS_GOTO(expr, label)                                  \
-  {{cudaError_t __err = (expr);                                                \
-  if (__err != cudaSuccess) {                                                  \
-    const char* name = cudaGetErrorName(__err);                                \
-    const char* reason = cudaGetErrorString(__err);                            \
-    LOG(FATAL) << absl::StrFormat("cuda error detected! name: %s; string: %s", \
-                                  name, reason);                               \
-    goto label;                                                                \
-  }                                                                            \
-  }                                                                            \
-  }
-
 bool CUCallSuccess(CUresult err);
-
-bool CUDACallSuccess(cudaError_t err);
 
 }  // namespace tcpdirect
 

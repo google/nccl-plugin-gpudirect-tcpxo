@@ -378,7 +378,7 @@ std::string ToString(const SendMessage& msg, std::string_view delim) {
          FormatFieldVal("sock", msg.sock, delim) +              //
          FormatFieldStd("reg_handle", msg.reg_handle, delim) +  //
          FormatFieldStd("op_id", msg.op_id, delim) +            //
-         FormatFieldStd("offset)", msg.offset, delim) +         //
+         FormatFieldStd("offset", msg.offset, delim) +          //
          FormatFieldStd("size", msg.size);
 }
 

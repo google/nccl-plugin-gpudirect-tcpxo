@@ -1,6 +1,18 @@
 # https://github.com/moby/moby/issues/34482
-ARG PRECOMPILED_LIBS=us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirect-tcpxo-precompiled-libs:v1.0.4
+ARG PRECOMPILED_LIBS=us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirect-tcpxo-precompiled-libs:v1.0.5
 FROM ${PRECOMPILED_LIBS} AS precompiled_libs
+
+# Build CoMMA
+FROM rust:slim-trixie AS builder
+RUN apt update \
+  && apt install -y --no-install-recommends \
+        git curl wget vim build-essential cmake gdb \
+        rsync clang python3 protobuf-compiler libprotobuf-dev \
+  && rm -rf /var/lib/apt/lists/*
+WORKDIR /third_party
+RUN git clone --recurse-submodules https://github.com/google/CoMMA
+WORKDIR CoMMA
+RUN cargo build --release
 
 FROM nvidia/cuda:12.8.0-devel-ubuntu22.04
 
@@ -75,6 +87,7 @@ RUN cp ../nccl-tests/LICENSE.txt license_nccl_tests.txt
 RUN cp ../abseil-cpp/LICENSE license_absl.txt
 RUN cp ../protobuf/LICENSE license_protobuf.txt
 RUN cp ../googletest/LICENSE license_gtest.txt
+COPY --from=builder /third_party/CoMMA/LICENSE license_comma.txt
 
 # Setup SSH to use port 222
 RUN cd /etc/ssh/ && sed --in-place='.bak' 's/#Port 22/Port 222/' sshd_config && \
@@ -86,6 +99,7 @@ RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 RUN mkdir /plugins
 COPY ./out/libnccl-net.so /plugins/libnccl-net.so
 
+COPY --from=builder /third_party/CoMMA/target/release/libnccl_profiler.so /plugins/libnccl-profiler-comma.so
 COPY --from=precompiled_libs /plugins/* /plugins/
 
 # setup scripts directory

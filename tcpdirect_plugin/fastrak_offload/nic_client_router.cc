@@ -45,14 +45,14 @@ NicClientRouter::NicClientRouter(
 
 absl::StatusOr<dxs::DxsClientInterface* absl_nonnull>
 NicClientRouter::GetDxsClient(absl::string_view dxs_addr) {
-  absl::MutexLock lock(&mu_);
+  absl::MutexLock lock(mu_);
   ASSIGN_OR_RETURN(PerNicClient * nic_client, GetOrInitClient(dxs_addr));
   return nic_client->dxs_client.get();
 }
 
 absl::StatusOr<tcpdirect::BufferManagerClientInterface* absl_nonnull>
 NicClientRouter::GetBufferManagerClient(absl::string_view dxs_addr) {
-  absl::MutexLock lock(&mu_);
+  absl::MutexLock lock(mu_);
   ASSIGN_OR_RETURN(PerNicClient * nic_client, GetOrInitClient(dxs_addr));
   return nic_client->buffer_manager_client.get();
 }

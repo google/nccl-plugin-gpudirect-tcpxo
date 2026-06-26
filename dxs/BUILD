@@ -9,9 +9,9 @@ cc_library(
 )
 
 cc_library(
-    name = "sctp-timeout-queue",
-    srcs = ["sctp-timeout-queue.cc"],
-    hdrs = ["sctp-timeout-queue.h"],
+    name = "sctp-timeout-queue-base",
+    srcs = ["sctp-timeout-queue-base.cc"],
+    hdrs = ["sctp-timeout-queue-base.h"],
     deps = [
         ":clock-interface",
         "//webrtc",

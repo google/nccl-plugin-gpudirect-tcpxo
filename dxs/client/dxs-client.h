@@ -200,10 +200,6 @@ class DxsClient : public DxsClientInterface,
       outstanding_send_ops_ ABSL_GUARDED_BY(mu_);
   absl::flat_hash_map<OpId, std::unique_ptr<LinearizedRecvOp::SharedState>>
       outstanding_linearized_recv_ops_ ABSL_GUARDED_BY(mu_);
-  absl::flat_hash_map<OpId, ReadState> outstanding_read_ops_
-      ABSL_GUARDED_BY(mu_);
-  absl::flat_hash_map<OpId, std::optional<absl::Status>> outstanding_write_ops_
-      ABSL_GUARDED_BY(mu_);
   absl::flat_hash_map<DataSocketHandle,
                       std::unique_ptr<RelaxedAtomic<DataSockStatus>>>
       outstanding_data_sockets_ ABSL_GUARDED_BY(mu_);

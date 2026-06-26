@@ -6,8 +6,8 @@
  * https://developers.google.com/open-source/licenses/bsd
  */
 
-#ifndef DXS_SCTP_TIMEOUT_QUEUE_H_
-#define DXS_SCTP_TIMEOUT_QUEUE_H_
+#ifndef DXS_SCTP_TIMEOUT_QUEUE_BASE_H_
+#define DXS_SCTP_TIMEOUT_QUEUE_BASE_H_
 
 #include <algorithm>
 #include <cstdint>
@@ -27,14 +27,14 @@ constexpr uint64_t kNanosecondsPerMicrosecond = 1000;
 constexpr uint64_t kNanosecondsPerMillisecond =
     1000 * kNanosecondsPerMicrosecond;
 
-class SctpTimeoutQueue;
+class SctpTimeoutQueueBase;
 
 // A Timeout compatible with dcSctp.  When created, the timeout isn't in the
 // parent queue yet.  When Start()'d the timeout is added to the parent queue.
 // When Stopped, the timeout is removed from the parent queue.
 class SctpTimeout : public dcsctp::Timeout {
  public:
-  explicit SctpTimeout(SctpTimeoutQueue& parent_queue,
+  explicit SctpTimeout(SctpTimeoutQueueBase& parent_queue,
                        const ClockInterface& clock)
       : parent_queue_(parent_queue), clock_(clock) {}
   ~SctpTimeout() override { Stop(); }
@@ -56,8 +56,7 @@ class SctpTimeout : public dcsctp::Timeout {
     return (expiration_ > other.expiration_) ? 1 : 0;
   }
 
-  // clang-format off
-  SctpTimeoutQueue& parent_queue_;
+  SctpTimeoutQueueBase& parent_queue_;
   const ClockInterface& clock_;
   // clang-format on
   dcsctp::TimeoutID timeout_id_;
@@ -73,15 +72,12 @@ class SctpTimeoutHandlerInterface {
   virtual void HandleTimeout(dcsctp::TimeoutID timeout_id) = 0;
 };
 
-// This class adapts dcsctp Timeouts for use in the USPS engine framework.
-// Timeouts are kept in a priority queue by expiration time, Run() calls
-// timeout_handler_.HandleTimeout when they expire.
-class SctpTimeoutQueue {
+class SctpTimeoutQueueBase {
  public:
-  explicit SctpTimeoutQueue(SctpTimeoutHandlerInterface& timeout_handler,
-                            const ClockInterface& clock);
+  explicit SctpTimeoutQueueBase(SctpTimeoutHandlerInterface& timeout_handler,
+                                const ClockInterface& clock);
 
-  void Run();
+  bool Run();
 
   std::unique_ptr<dcsctp::Timeout> CreateTimeout() {
     return static_cast<std::unique_ptr<dcsctp::Timeout>>(
@@ -121,4 +117,4 @@ class SctpTimeoutQueue {
 };
 
 }  // namespace dxs
-#endif  // DXS_SCTP_TIMEOUT_QUEUE_H_
+#endif  // DXS_SCTP_TIMEOUT_QUEUE_BASE_H_
