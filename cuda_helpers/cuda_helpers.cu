@@ -36,11 +36,11 @@ static inline void wc_store_fence(void) {
 #include "absl/strings/str_format.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "dxs/client/oss/status_macros.h"
 #include "cuda.h"
 #include "curand_kernel.h"
 #include "nccl.h"
 #include "tcpdirect_plugin/fastrak_offload/shared_defs.h"
-#include "dxs/client/oss/status_macros.h"
 
 constexpr int kWaitRXDMSeconds = 30;
 

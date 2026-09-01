@@ -1,13 +1,16 @@
-FROM nvidia/cuda:12.0.0-devel-ubuntu22.04
+FROM nvidia/cuda:12.8.0-devel-ubuntu22.04
 
-ENV DEBIAN_FRONTEND='noninteractive'
+ARG DEBIAN_FRONTEND='noninteractive'
 
-RUN apt update \
-  && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get dist-upgrade -y && \
+    apt-get install -y --no-install-recommends \
         git openssh-server wget iproute2 vim build-essential cmake gdb net-tools iptables \
         protobuf-compiler libprotobuf-dev libprotoc-dev rsync libssl-dev \
-        pkg-config libmnl-dev python3 xserver-xorg-core less tcpdump \
-  && rm -rf /var/lib/apt/lists/*
+        pkg-config libmnl-dev python3 xserver-xorg-core less tcpdump && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # build ethtool
 WORKDIR /third_party

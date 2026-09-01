@@ -14,7 +14,7 @@ inline constexpr int kFastrakPluginMajor = 1;
 
 inline constexpr int kFastrakPluginMinor = 0;
 
-inline constexpr int kFastrakPluginPatch = 17;
+inline constexpr int kFastrakPluginPatch = 18;
 }  // namespace fastrak
 
 #endif  // TCPDIRECT_PLUGIN_FASTRAK_OFFLOAD_FASTRAK_PLUGIN_VERSION_H_

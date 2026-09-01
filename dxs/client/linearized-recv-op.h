@@ -33,7 +33,7 @@ typedef struct {
   RecvAckMessage::Status req_status;
 } RecvOpResult;
 
-static_assert(std::is_trivially_copyable<RecvOpResult>::value,
+static_assert(std::is_trivially_copyable_v<RecvOpResult>,
               "RecvOpResult must be trivially copyable");
 
 class LinearizedRecvOp : public LinearizedRecvOpInterface {

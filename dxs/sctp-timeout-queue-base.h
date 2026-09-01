@@ -14,6 +14,7 @@
 #include <memory>
 #include <optional>
 
+#include "absl/base/attributes.h"
 #include "api/units/timestamp.h"
 #include "dxs/clock-interface.h"
 #include "net/dcsctp/public/timeout.h"
@@ -74,8 +75,10 @@ class SctpTimeoutHandlerInterface {
 
 class SctpTimeoutQueueBase {
  public:
-  explicit SctpTimeoutQueueBase(SctpTimeoutHandlerInterface& timeout_handler,
-                                const ClockInterface& clock);
+  explicit SctpTimeoutQueueBase(SctpTimeoutHandlerInterface& timeout_handler
+                                    ABSL_ATTRIBUTE_LIFETIME_BOUND,
+                                const ClockInterface& clock
+                                    ABSL_ATTRIBUTE_LIFETIME_BOUND);
 
   bool Run();
 

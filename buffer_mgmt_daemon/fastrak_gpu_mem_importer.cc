@@ -23,6 +23,7 @@
 
 #include "absl/cleanup/cleanup.h"
 #include "absl/log/log.h"
+#include "absl/numeric/int128.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
@@ -129,9 +130,16 @@ void FasTrakGpuMemImporter::HandleRequest(
     return;
   }
 
-  status = req.op_type() == tcpdirect::REG_BUFFER
-               ? HandleRegBuffer(client, binding, request, &resp, fin)
-               : HandleDeregBuffer(client, binding, req, &resp, fin);
+  switch (req.op_type()) {
+    case tcpdirect::REG_BUFFER:
+      status = HandleRegBuffer(client, binding, request, &resp, fin);
+      break;
+    case tcpdirect::DEREG_BUFFER:
+      status = HandleDeregBuffer(client, binding, req, &resp, fin);
+      break;
+    default:
+      status = absl::InvalidArgumentError("Unknown op type");
+  }
 }
 
 absl::Status FasTrakGpuMemImporter::HandleRegBuffer(

@@ -31,7 +31,7 @@ typedef struct {
   SendAckMessage::Status req_status;
 } SendOpResult;
 
-static_assert(std::is_trivially_copyable<SendOpResult>::value,
+static_assert(std::is_trivially_copyable_v<SendOpResult>,
               "SendOpResult must be trivially copyable.");
 
 class SendOp : public SendOpInterface {

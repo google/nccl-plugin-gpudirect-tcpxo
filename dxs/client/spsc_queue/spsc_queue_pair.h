@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "absl/base/attributes.h"
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -157,7 +158,7 @@ class SpscQueuePair {
   // committed or destructed. There can only be one outstanding batch at a time.
   // NOTE: SendBatch holds a pointer to `*this` so it must not move while a
   // batch is outstanding.
-  SendBatch BeginSend();
+  SendBatch BeginSend() ABSL_ATTRIBUTE_LIFETIME_BOUND;
 
   // Expose ALL available bytes via `batch`.
   // Returns kUnavailable if there's no byte available.
@@ -177,10 +178,11 @@ class SpscQueuePair {
   absl::Status RestoreState(const SpscQueuePairState& state);
 
  private:
-  SpscQueuePair(volatile Doorbells* local_doorbells,
-                absl::Span<volatile uint8_t> local_ring,
-                volatile Doorbells* remote_doorbells,
-                absl::Span<volatile uint8_t> remote_ring);
+  SpscQueuePair(
+      volatile Doorbells* local_doorbells ABSL_ATTRIBUTE_LIFETIME_BOUND,
+      absl::Span<volatile uint8_t> local_ring ABSL_ATTRIBUTE_LIFETIME_BOUND,
+      volatile Doorbells* remote_doorbells ABSL_ATTRIBUTE_LIFETIME_BOUND,
+      absl::Span<volatile uint8_t> remote_ring ABSL_ATTRIBUTE_LIFETIME_BOUND);
 
   // Warmup the queue by reading all doorbells and rings.
   void Warmup() const;

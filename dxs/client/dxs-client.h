@@ -13,6 +13,8 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 
+#include <cstddef>
+#include <deque>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -105,7 +107,8 @@ class DxsClient : public DxsClientInterface,
   absl::StatusOr<absl::Duration> Ping() override;
 
   // Returns the server's build ID.
-  absl::string_view GetServerBuildId() override ABSL_LOCKS_EXCLUDED(mu_);
+  absl::string_view GetServerBuildId() ABSL_ATTRIBUTE_LIFETIME_BOUND override
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns the server version, or zero iff the client is not connected to DXS.
   uint64_t GetServerVersion() override ABSL_LOCKS_EXCLUDED(mu_);
@@ -195,7 +198,7 @@ class DxsClient : public DxsClientInterface,
     std::optional<absl::StatusOr<uint64_t>> size_out;
   };
 
-  absl::Mutex mu_;
+  mutable absl::Mutex mu_;
   absl::flat_hash_map<OpId, std::unique_ptr<SendOp::SharedState>>
       outstanding_send_ops_ ABSL_GUARDED_BY(mu_);
   absl::flat_hash_map<OpId, std::unique_ptr<LinearizedRecvOp::SharedState>>
@@ -267,7 +270,8 @@ class BufferManager : public BufferManagerInterface,
   bool HealthCheck() const override;
 
   // Returns the server's build ID.
-  absl::string_view GetServerBuildId() override ABSL_LOCKS_EXCLUDED(mu_);
+  absl::string_view GetServerBuildId() ABSL_ATTRIBUTE_LIFETIME_BOUND override
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns the server version, or zero iff the client is not connected to DXS.
   uint64_t GetServerVersion() override ABSL_LOCKS_EXCLUDED(mu_);

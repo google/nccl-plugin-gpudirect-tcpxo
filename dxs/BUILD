@@ -15,6 +15,7 @@ cc_library(
     deps = [
         ":clock-interface",
         "//webrtc",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/log:check",
         "@ortools//ortools/base:adjustable_priority_queue",
     ],

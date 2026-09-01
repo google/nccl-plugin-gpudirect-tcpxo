@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/base/attributes.h"
 #include "absl/flags/declare.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -36,12 +37,12 @@ class GuestLlcmDevice : public LlcmMemoryInterface {
 
   // Returns the Reverse Llcm memory in the specified region. Subject to
   // the same size and alignment constraints as SpscMessagingQueuePair::Create.
-  absl::Span<volatile uint8_t> GetLocalMemory(uint64_t offset,
-                                              uint64_t size) const override;
+  absl::Span<volatile uint8_t> GetLocalMemory(uint64_t offset, uint64_t size)
+      const ABSL_ATTRIBUTE_LIFETIME_BOUND override;
   // Returns the Llcm memory in the specified region. Subject to the same
   // size and alignment constraints as SpscMessagingQueuePair::Create.
-  absl::Span<volatile uint8_t> GetRemoteMemory(uint64_t offset,
-                                               uint64_t size) const override;
+  absl::Span<volatile uint8_t> GetRemoteMemory(uint64_t offset, uint64_t size)
+      const ABSL_ATTRIBUTE_LIFETIME_BOUND override;
 
  private:
   std::unique_ptr<GuestLlcm> device_;

@@ -84,7 +84,7 @@ absl::StatusOr<UnixSocketMessage> UnixSocketClient::MakeRequest(
         error_number = EIO;
       }
       return absl::ErrnoToStatus(
-          errno, absl::StrFormat("receive() error: %d", error_number));
+          error_number, absl::StrFormat("receive() error: %d", error_number));
     }
   }
   return conn_->ReadMessage();

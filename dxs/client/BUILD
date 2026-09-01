@@ -21,6 +21,7 @@ cc_library(
         "//dxs/client/guest_llcm",
         "//dxs/client/oss:htonl",
         "//dxs/client/oss:status_macros",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/cleanup",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/log",

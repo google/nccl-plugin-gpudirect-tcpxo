@@ -4,28 +4,29 @@ FROM ${PRECOMPILED_LIBS} AS precompiled_libs
 
 # Build CoMMA
 FROM rust:slim-trixie AS builder
-RUN apt update \
-  && apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         git curl wget vim build-essential cmake gdb \
-        rsync clang python3 protobuf-compiler libprotobuf-dev \
-  && rm -rf /var/lib/apt/lists/*
+        rsync clang python3 protobuf-compiler libprotobuf-dev
+
 WORKDIR /third_party
 RUN git clone --recurse-submodules https://github.com/google/CoMMA
 WORKDIR CoMMA
 RUN cargo build --release
 
-FROM nvidia/cuda:12.8.0-devel-ubuntu22.04
+FROM nvidia/cuda:13.2.0-devel-ubuntu22.04
 
-ENV DEBIAN_FRONTEND='noninteractive'
+ARG DEBIAN_FRONTEND='noninteractive'
 
-RUN apt update && apt -y upgrade
-RUN apt -y autoremove
-
-RUN apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get dist-upgrade -y && \
+    apt-get install -y --no-install-recommends \
     git openssh-server wget iproute2 vim libopenmpi-dev build-essential \
     cmake gdb python3 \
-    protobuf-compiler libprotobuf-dev rsync libssl-dev libcurl4-openssl-dev \
-  && rm -rf /var/lib/apt/lists/*
+    protobuf-compiler libprotobuf-dev rsync libssl-dev libcurl4-openssl-dev  && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ARG CUDA12_GENCODE='-gencode=arch=compute_90,code=sm_90'
 ARG CUDA12_PTX='-gencode=arch=compute_90,code=compute_90'
@@ -56,7 +57,7 @@ RUN ./bootstrap --parallel=16 && make -j 16 && make install
 
 # build googletest
 WORKDIR /third_party
-RUN git clone https://github.com/google/googletest.git -b v1.14.0
+RUN git clone https://github.com/google/googletest.git -b v1.17.0
 WORKDIR googletest
 RUN mkdir build
 WORKDIR build
@@ -67,7 +68,7 @@ WORKDIR /third_party
 RUN git clone https://github.com/abseil/abseil-cpp.git
 WORKDIR abseil-cpp
 RUN git fetch --all --tags
-RUN git checkout tags/20240116.2 -b build
+RUN git checkout tags/20260526.0 -b build
 WORKDIR build
 RUN cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DABSL_USE_GOOGLETEST_HEAD=ON .. && cmake --build . -j 8 --target all && cmake --install .
 
@@ -76,7 +77,7 @@ WORKDIR /third_party
 RUN git clone https://github.com/protocolbuffers/protobuf.git
 WORKDIR protobuf
 RUN git fetch --all --tags
-RUN git checkout tags/v27.1 -b build
+RUN git checkout tags/v35.1 -b build
 WORKDIR build
 RUN cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_ABSL_PROVIDER=package .. && cmake --build . -j 8 --target all && cmake --install .
 
@@ -99,7 +100,7 @@ RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 RUN mkdir /plugins
 COPY ./out/libnccl-net.so /plugins/libnccl-net.so
 
-COPY --from=builder /third_party/CoMMA/target/release/libnccl_profiler.so /plugins/libnccl-profiler-comma.so
+COPY --from=builder /third_party/CoMMA/target/release/libnccl_profiler.so /plugins/libnccl-profiler.so
 COPY --from=precompiled_libs /plugins/* /plugins/
 
 # setup scripts directory
