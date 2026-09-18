@@ -34,9 +34,9 @@ workload.
 Docker containers consisting of the artifacts of this repository are available
 on Google Cloud Platform's (GCP) artifact repository for quick consumption.
 These docker containers are built on the same code distributed here (exempting
-the future libraries listed below). These docker containers will continue to be
-provided as an alternative to setting up a build environment, for users who only
-need to use GPUDirect-TCPXO as is.
+the additional libraries listed below). These docker containers will continue to
+be provided as an alternative to setting up a build environment, for users who
+only need to use GPUDirect-TCPXO as is.
 
 You can find the latest docker container images, along with detailed release
 notes, in our
@@ -68,13 +68,16 @@ To enable `docker` to retrieve these images, see our [gcloud](#gcloud) section.
 
     This is not a fatal error nor does it affect the workload in anyway.
 
-### *Future Libraries*
+### *Additional Libraries*
 
-In addition to RxDM and the network plugin, there are three more libraries that
-may be used when running GPUDirect-TCPXO:
+In addition to RxDM and the network plugin, there are 4 more libraries that are
+shipped with GPUDirect-TCPXO:
 
 -   GPUViz
     -   Used for local collection of workload metrics.
+-   The CoMMA Profiler Plugin [Github Repo](https://github.com/google/CoMMA)
+    -   This is GCP's implementation of the NCCL profiling plugin interface.
+        It's used for collecting detailed NCCL communication metrics.
 -   The GCP NCCL Tuner Plugin
     -   This is GCP's implementation of NCCL's tuner plugin interface, tuned for
         performance on Google's networking infrastructure.
@@ -83,8 +86,8 @@ may be used when running GPUDirect-TCPXO:
         that the configuration options for GPUDirect-TCPXO are in line with our
         recommendations. It then loads the actual network plugin.
 
-These libraries are also in the process of being open-sourced. For now, we are
-providing them as closed-source binaries through a separate
+Currently the CoMMA profiler plugin is built from source. The other 3 libraries
+are pulled in as closed-source binaries through a separate
 [docker container](https://us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirect-tcpxo-precompiled-libs).
 
 ## Supported Build Platform
@@ -100,27 +103,12 @@ distribution.
 
 ## Supported Version
 
-This version of GPUDirect-TCPXO has been tested against internal workloads for
-performance and stability with the following NCCL and CUDA version:
+GPUDirect-TCPXO has been tested against internal workloads for performance and
+stability with the following NCCL and CUDA version:
 
 CUDA | NCCL
 ---- | ---------
-12.8 | v2.28.7-1
-
-In addition to the above, we've verified that the following combinations are
-buildable:
-
-CUDA | NCCL
----- | ---------
-12.2 | v2.21.5-1
-12.4 | v2.21.5-1
-12.4 | v2.23.4-1
-12.8 | v2.19.3-1
-12.8 | v2.21.5-1
-12.8 | v2.23.4-1
-12.8 | v2.26.5-1
-12.8 | v2.27.5-1
-12.8 | v2.28.3-1
+13.2 | v2.28.7-1
 
 ## Prerequisites
 
@@ -235,8 +223,8 @@ for configuring authentication. Make sure to include
 
 We only need the [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit); we
 do not need the driver nor kernel modules to build. This release is built and
-tested against CUDA 12.8. See the
-[CUDA download instructions](https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_network)
+tested against CUDA 13.2. See the
+[CUDA download instructions](https://developer.nvidia.com/cuda-13-2-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_network)
 to install the toolkit then return here. This link takes you to the instructions
 for installing the CUDA Toolkit for Ubuntu 22.04 by adding NVIDIA's CUDA
 repository as an `apt` source. There are other installation methods available on
@@ -261,8 +249,8 @@ available at `/usr/local`. Here's the required directory structure:
 \..
   /local
   \..
-    /cuda-12.8
-    /cuda -> cuda-12.8
+    /cuda-13.2
+    /cuda -> cuda-13.2
     /nccl-v2.28.7-1
     /nccl -> nccl-v2.28.7-1
 ```
@@ -341,9 +329,9 @@ Here are some tips for setting up the prerequisites on non-Ubuntu distributions:
     -   If you do not intend to build the docker containers, you may skip
         installing Docker.
 -   The CUDA Toolkit page also provides
-    [instructions](https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Linux&target_arch=x86_64)
+    [instructions](https://developer.nvidia.com/cuda-13-2-0-download-archive?target_os=Linux&target_arch=x86_64)
     for many popular distributions. After installing, ensure that
-    `/usr/local/cuda` points to the CUDA Toolkit 12.8 installation.
+    `/usr/local/cuda` points to the CUDA Toolkit 13.2 installation.
 -   NCCL: since we're just cloning a repository, the
     [installation instructions](#nccl-prerequisite) above still apply to other
     distributions with one caveat:
@@ -570,7 +558,8 @@ docker build -f tcpxo.dockerfile .
 
 The `tcpxo.dockerfile` automatically retrieves the precompiled libraries and
 their supporting files from the precompiled library docker image. As discussed
-in the [Future Libraries](#future-libraries) section, these libraries are:
+in the [Additional Libraries](#additional-libraries) section, these libraries
+are:
 
 -   GPUViz
 -   Guest config checker
@@ -662,7 +651,7 @@ Here are some options:
     like Ubuntu 24:
 
     ```
-    FROM nvidia/cuda:12.8.0-devel-ubuntu24.04
+    FROM nvidia/cuda:13.2.0-devel-ubuntu24.04
     ```
 
 ## Deploying a Test Workload
